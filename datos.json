@@ -1,6 +1,6 @@
 {
- "updatedAt": "2026-10-19T19:40:27Z",
- "checkedAt": "2026-10-19T21:40:31Z",
+ "updatedAt": "2026-10-19T22:49:02Z",
+ "checkedAt": "2026-10-19T22:49:02Z",
  "estado": {
   "emergencias": {
    "nivel": "naranja",
@@ -10,9 +10,9 @@
   "aemet": {
    "nivel": "amarillo",
    "titulo": "aviso amarillo",
-   "texto": "Lluvias y tormentas el martes. La lluvia vuelve esta madrugada y podría dejar unos 30 l/m² en una hora en algún punto."
+   "texto": "Lluvias y tormentas el martes desde las 00:00 hasta las 12:00 en Ibiza y Formentera. Puede dejar unos 30 l/m² en una hora en algún punto, con muchos rayos."
   },
-  "notaAhora": "Alerta naranja de Emergencias y aviso amarillo de AEMET. Hoy han caído 83 l/m² en Vila y 27 en Formentera hasta las 16:00. Vuelve a llover esta madrugada, con lo más fuerte entre las 3 y las 7 según la previsión por horas; mejora el martes a mediodía y el miércoles AEMET da 0–5 % de lluvia."
+  "notaAhora": "Alerta naranja de Emergencias y aviso amarillo de AEMET hasta las 12:00 del martes. El lunes cayeron 83 l/m² en Vila y 27 en Formentera (datos hasta las 16:00). Esta madrugada vuelve la lluvia, con lo más fuerte entre las 3 y las 7; mejora a mediodía y el miércoles AEMET da 0–5 % de lluvia."
  },
  "estaciones": [
   {
