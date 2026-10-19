@@ -1,0 +1,898 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Mapa de la DANA en Ibiza y Formentera: lluvia, avisos oficiales, cortes de carretera y zonas a evitar. Se actualiza cada hora.">
+<title>Mapa DANA Ibiza</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Source+Sans+3:wght@400;600&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+<style>
+/* Layout: parte de situación — avisos oficiales arriba, mapa con zoom en el centro, ficha y lista al lado, fuentes al final */
+:root{
+  --bg:#eef2f3; --panel:#ffffff; --fg:#14222b; --muted:#566872; --line:#cfd9de;
+  --sea:#cfe2ec; --land:#f3f4ec; --relief:#c9cfbd; --plain:#fafaf4; --salt:#e9dfe6; --border-mun:#c3cbc8; --road:#3f78d8; --road2:#86a9e6; --town:#2c3b44;
+  --accent:#0d5b75;
+  --r1:#e4dcf7; --r2:#b9a5ea; --r3:#8a6bd6; --r4:#6040b0; --r5:#3b1f7a;
+  --ok:#3d7a5a; --warn:#b07a0a; --bad:#b4301f; --info:#5a5f9e; --live:#0f7f6f;
+  --yellow:#e9c21c; --orange:#e3791b; --red:#c62d24;
+  --zone-past:#8a6bd6; --zone-now:#e9c21c;
+  --f-disp:"Barlow Semi Condensed","Arial Narrow",Arial,sans-serif;
+  --f-body:"Source Sans 3","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c1418; --panel:#131e24; --fg:#e2ebee; --muted:#93a5ad; --line:#26363e;
+  --sea:#0e1f27; --land:#1b262a; --relief:#2b3836; --plain:#1f2b2f; --salt:#2e2a33; --border-mun:#34454a; --road:#6f9cf0; --road2:#46679f; --town:#c9d6db; --accent:#5fb3d1;
+  --r1:#3a2d5c; --r2:#5b45a0; --r3:#8a6bd6; --r4:#b9a5ea; --r5:#e4dcf7;
+  --ok:#67b38a; --warn:#e0a935; --bad:#ef6a57; --info:#9aa0e0; --live:#3fc2ac;
+  --zone-past:#8a6bd6; --zone-now:#e9c21c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c1418; --panel:#131e24; --fg:#e2ebee; --muted:#93a5ad; --line:#26363e;
+  --sea:#0e1f27; --land:#1b262a; --relief:#2b3836; --plain:#1f2b2f; --salt:#2e2a33; --border-mun:#34454a; --road:#6f9cf0; --road2:#46679f; --town:#c9d6db; --accent:#5fb3d1;
+  --r1:#3a2d5c; --r2:#5b45a0; --r3:#8a6bd6; --r4:#b9a5ea; --r5:#e4dcf7;
+  --ok:#67b38a; --warn:#e0a935; --bad:#ef6a57; --info:#9aa0e0; --live:#3fc2ac;
+  --zone-past:#8a6bd6; --zone-now:#e9c21c; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 40px}
+.wrap{max-width:1100px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+h1,h2,h3{font-family:var(--f-disp);text-wrap:balance;margin:0;line-height:1.1}
+h1{font-size:30px;font-weight:700}
+h2{font-size:21px;font-weight:600}
+h3{font-size:17px;font-weight:600}
+a{color:var(--accent)}
+.eyebrow{font-family:var(--f-mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+header{display:flex;flex-direction:column;gap:6px}
+header p{margin:0;color:var(--muted);max-width:70ch}
+.fresh{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-mono);font-size:12.5px;color:var(--muted)}
+.fresh i{width:8px;height:8px;border-radius:50%;background:var(--muted)}
+.fresh.on i{background:var(--live)}
+@media (prefers-reduced-motion:no-preference){.fresh.on i{animation:pulse 2s infinite}@keyframes pulse{50%{opacity:.35}}}
+.alerts{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.alert{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px 12px 10px 14px;position:relative;min-width:0}
+.alert::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:6px 0 0 6px;background:var(--c)}
+.alert b{font-family:var(--f-disp);font-size:16px;font-weight:600;display:block}
+.alert span{font-size:13.5px;color:var(--muted)}
+.main{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:18px;align-items:start}
+@media (max-width:860px){.main{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button,.chip,.btn{font:inherit;font-size:13.5px;border:1px solid var(--line);background:var(--bg);color:var(--fg);border-radius:999px;padding:6px 12px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--fg);color:var(--panel);border-color:var(--fg)}
+.chip[aria-pressed="false"]{opacity:.5;text-decoration:line-through}
+.chip i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:middle;background:var(--c)}
+button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.phase-note{font-size:13.5px;color:var(--muted);margin:0}
+.mapwrap{position:relative;border-radius:6px;overflow:hidden;background:var(--sea);touch-action:none;user-select:none;-webkit-user-select:none}
+svg.map{width:100%;height:auto;display:block;cursor:grab}
+svg.map.drag{cursor:grabbing}
+.coast{fill:var(--land);stroke:none}
+.mun{fill:none;stroke:var(--border-mun);stroke-width:.7px;stroke-dasharray:3 3;vector-effect:non-scaling-stroke}
+.road{fill:none;stroke:var(--road);stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.road.r1{stroke-width:2.6px;opacity:.9}.road.r2{stroke-width:1.6px;stroke:var(--road2);stroke-dasharray:5 3}
+.zoombar{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:6px}
+.zoombar button{width:38px;height:38px;border-radius:6px;border:1px solid var(--line);background:var(--panel);color:var(--fg);font:600 18px var(--f-mono);cursor:pointer}
+.tip{position:absolute;pointer-events:none;background:var(--fg);color:var(--panel);font-size:13px;line-height:1.3;padding:6px 9px;border-radius:5px;max-width:240px;z-index:3;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.tip b{display:block;font-weight:600}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:50%;display:inline-block}
+.radarbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.radarbar a{font-size:13.5px;border:1px solid var(--accent);border-radius:999px;padding:6px 12px;text-decoration:none;font-weight:600}
+.detail p{margin:0}
+.badges{display:flex;flex-wrap:wrap;gap:6px}
+.badge{font-family:var(--f-mono);font-size:11.5px;padding:2px 8px;border-radius:4px;border:1px solid var(--line)}
+.st-activo{color:var(--bad);border-color:var(--bad)}
+.st-precaucion{color:var(--warn);border-color:var(--warn)}
+.st-normal{color:var(--ok);border-color:var(--ok)}
+.st-sin{color:var(--muted)}
+.srcs{font-size:13.5px;display:flex;flex-direction:column;gap:3px;padding-left:18px;margin:0}
+.srcs small{color:var(--muted)}
+.list{display:flex;flex-direction:column;max-height:520px;overflow:auto;border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:10px;align-items:start;padding:9px 4px;border:0;border-bottom:1px solid var(--line);cursor:pointer;background:none;text-align:left;color:inherit;font:inherit;width:100%}
+.row:hover{background:var(--bg)}
+.row .dot{width:10px;height:10px;border-radius:2px;margin-top:5px}
+.row b{font-weight:600;display:block}
+.row small{color:var(--muted);font-size:12.5px}
+.sect{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.sect p{margin:0;max-width:72ch}
+.feed{display:flex;flex-direction:column;gap:0;border-top:1px solid var(--line)}
+.av{display:grid;grid-template-columns:110px minmax(0,1fr);gap:4px 14px;padding:11px 2px;border-bottom:1px solid var(--line)}
+@media (max-width:560px){.av{grid-template-columns:minmax(0,1fr)}}
+.av .who{display:flex;flex-direction:column;gap:3px}
+.av .who b{font-family:var(--f-disp);font-weight:600;font-size:15px;line-height:1.15}
+.av time{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.av p{margin:0}
+.av small{color:var(--muted);font-size:12.5px}
+.lvl{display:inline-block;font-family:var(--f-mono);font-size:11px;padding:1px 7px;border-radius:4px;color:#14222b;background:var(--c);align-self:flex-start}
+.live{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.live a{display:flex;flex-direction:column;gap:2px;border:1px solid var(--line);border-radius:6px;padding:10px 12px;text-decoration:none;color:var(--fg);background:var(--bg)}
+.live a b{font-family:var(--f-disp);font-weight:600;font-size:16px;color:var(--accent)}
+.live a span{font-size:13px;color:var(--muted)}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:6px}
+table{border-collapse:collapse;width:100%;min-width:640px;font-size:13.5px}
+th,td{text-align:left;padding:7px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--f-mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--bg)}
+.kw{display:flex;flex-wrap:wrap;gap:6px}
+.kw code{font-family:var(--f-mono);font-size:12.5px;background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:2px 7px}
+.warnbox{border-left:4px solid var(--warn);background:var(--bg);padding:10px 12px;border-radius:0 6px 6px 0;font-size:14px}
+dl.gloss{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 12px;margin:0;font-size:14px}
+dl.gloss dt{font-weight:600}
+dl.gloss dd{margin:0;color:var(--muted)}
+footer{font-size:12.5px;color:var(--muted)}
+@media (max-width:600px){h1{font-size:25px}.alerts{gap:6px}.alert{padding:7px 10px 7px 13px}.alert b{font-size:15px}.alert span{font-size:12.5px}header p{font-size:14px}}
+</style>
+
+<div class="wrap">
+<header>
+  <div class="eyebrow">Parte de situación · Pitiusas</div>
+  <h1>Mapa de la DANA en Ibiza y Formentera</h1>
+  <p>Lluvia medida, avisos oficiales, carreteras cortadas, zonas a evitar y vídeos de daños. Los avisos y la lluvia de las estaciones se actualizan cada hora; si tienes la página abierta, se refresca sola cada pocos minutos.</p>
+  <span class="fresh" id="fresh"><i></i><span id="freshTxt">Cargando…</span></span>
+</header>
+
+<section class="alerts" aria-label="Nivel de alerta" id="alertBand">
+  <div class="alert" style="--c:var(--red)"><b id="emTitle">Emergencias: alerta roja</b><span id="emTxt">Plan Meteobal activo en Ibiza y Formentera, al menos hasta el martes 20.</span></div>
+  <div class="alert" style="--c:var(--yellow)"><b id="aeTitle">AEMET: aviso amarillo</b><span id="aeTxt">Lluvia de hasta 20 l/m² en 1 hora y tormentas hasta el martes a las 12:00.</span></div>
+  <div class="alert" style="--c:var(--orange)"><b>Torrentes todavía cargados</b><span>En el noreste pueden crecer aunque llueva poco. No cruces cauces ni vados.</span></div>
+</section>
+
+<div class="main">
+  <div class="card">
+    <div class="seg" role="group" aria-label="Qué momento ver">
+      <button id="ph-now" data-ph="now" aria-pressed="true">Ahora</button>
+      <button id="ph-d19" data-ph="d19" aria-pressed="false">Lunes 19 (noreste)</button>
+      <button id="ph-d18" data-ph="d18" aria-pressed="false">Domingo 18 (sur)</button>
+      <button id="ph-all" data-ph="all" aria-pressed="false">Todo</button>
+    </div>
+    <p class="phase-note" id="phaseNote"></p>
+    <div class="seg" role="group" aria-label="Capas">
+      <button class="chip" id="ly-est" data-ly="estacion" aria-pressed="true"><i style="--c:var(--live)"></i>Lluvia de hoy</button>
+      <button class="chip" id="ly-rain" data-ly="lluvia" aria-pressed="true"><i style="--c:var(--r3)"></i>Lluvia del episodio</button>
+      <button class="chip" id="ly-prob" data-ly="prob" aria-pressed="true"><i style="--c:var(--accent)"></i>Probabilidad de lluvia</button>
+      <button class="chip" id="ly-inc" data-ly="incidencia" aria-pressed="true"><i style="--c:var(--bad)"></i>Cortes y daños</button>
+      <button class="chip" id="ly-zone" data-ly="zona" aria-pressed="true"><i style="--c:var(--zone-now)"></i>Zonas</button>
+      <button class="chip" id="ly-media" data-ly="medio" aria-pressed="true"><i style="--c:var(--info)"></i>Vídeos y fotos</button>
+    </div>
+    <div class="mapwrap" id="mapwrap">
+      <svg class="map" id="map" viewBox="0 0 435 520" role="img" aria-label="Mapa de Ibiza y Formentera">
+        <defs>
+          <pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="var(--zone-past)" stroke-width="2" opacity=".45"/></pattern>
+        <filter id="soft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="7"/></filter>
+          <filter id="shore" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="4"/></filter>
+          <clipPath id="landclip"><path d="M298.9,462.6L329.7,449.1L343.7,464.3L343.7,486.2L324.1,491.3L298.9,491.3L259.7,466.0L248.5,459.2L231.8,469.3L223.4,474.4L212.2,493.0L201.0,501.4L189.8,498.0L192.6,477.8L189.8,469.3L189.8,459.2L192.6,452.4L198.2,444.0L198.2,435.6L192.6,432.2L189.8,428.8L192.6,420.4L203.8,410.2L209.4,415.3L215.0,411.9L223.4,400.1L226.2,384.9L229.0,384.9L231.8,386.6L231.8,388.3L231.8,390.0L268.1,445.7L298.9,462.6ZM363.3,48.9L357.7,57.3L363.3,77.6L374.4,111.4L363.3,111.4L352.1,119.8L346.5,133.3L343.7,148.5L338.1,153.6L312.9,172.1L287.7,209.3L276.5,217.7L256.9,229.6L248.5,239.7L245.7,236.3L240.1,231.2L237.4,226.2L223.4,243.1L212.2,249.8L206.6,283.6L203.8,307.2L178.6,308.9L173.0,288.7L159.0,276.8L147.8,281.9L142.2,281.9L139.4,280.2L131.0,281.9L125.4,270.1L111.5,265.0L97.5,270.1L91.9,281.9L69.5,265.0L58.3,254.9L55.5,236.3L66.7,212.7L66.7,197.5L61.1,185.7L66.7,180.6L75.1,175.5L83.5,173.8L91.9,178.9L100.3,173.8L105.9,172.1L125.4,172.1L117.0,129.9L119.8,106.3L128.2,96.2L136.6,92.8L150.6,82.7L167.4,62.4L173.0,62.4L181.4,69.1L195.4,57.3L203.8,62.4L220.6,48.9L240.1,38.7L262.5,32.0L279.3,35.4L287.7,25.2L296.1,21.9L307.3,21.9L321.3,32.0L326.9,33.7L340.9,35.4L349.3,37.1L354.9,42.1L363.3,48.9Z"/></clipPath>
+        </defs>
+        <path d="M298.9,462.6L329.7,449.1L343.7,464.3L343.7,486.2L324.1,491.3L298.9,491.3L259.7,466.0L248.5,459.2L231.8,469.3L223.4,474.4L212.2,493.0L201.0,501.4L189.8,498.0L192.6,477.8L189.8,469.3L189.8,459.2L192.6,452.4L198.2,444.0L198.2,435.6L192.6,432.2L189.8,428.8L192.6,420.4L203.8,410.2L209.4,415.3L215.0,411.9L223.4,400.1L226.2,384.9L229.0,384.9L231.8,386.6L231.8,388.3L231.8,390.0L268.1,445.7L298.9,462.6ZM363.3,48.9L357.7,57.3L363.3,77.6L374.4,111.4L363.3,111.4L352.1,119.8L346.5,133.3L343.7,148.5L338.1,153.6L312.9,172.1L287.7,209.3L276.5,217.7L256.9,229.6L248.5,239.7L245.7,236.3L240.1,231.2L237.4,226.2L223.4,243.1L212.2,249.8L206.6,283.6L203.8,307.2L178.6,308.9L173.0,288.7L159.0,276.8L147.8,281.9L142.2,281.9L139.4,280.2L131.0,281.9L125.4,270.1L111.5,265.0L97.5,270.1L91.9,281.9L69.5,265.0L58.3,254.9L55.5,236.3L66.7,212.7L66.7,197.5L61.1,185.7L66.7,180.6L75.1,175.5L83.5,173.8L91.9,178.9L100.3,173.8L105.9,172.1L125.4,172.1L117.0,129.9L119.8,106.3L128.2,96.2L136.6,92.8L150.6,82.7L167.4,62.4L173.0,62.4L181.4,69.1L195.4,57.3L203.8,62.4L220.6,48.9L240.1,38.7L262.5,32.0L279.3,35.4L287.7,25.2L296.1,21.9L307.3,21.9L321.3,32.0L326.9,33.7L340.9,35.4L349.3,37.1L354.9,42.1L363.3,48.9Z" fill="none" stroke="var(--land)" stroke-width="10" opacity=".55" filter="url(#shore)"/>
+        <path class="coast" d="M298.9,462.6L329.7,449.1L343.7,464.3L343.7,486.2L324.1,491.3L298.9,491.3L259.7,466.0L248.5,459.2L231.8,469.3L223.4,474.4L212.2,493.0L201.0,501.4L189.8,498.0L192.6,477.8L189.8,469.3L189.8,459.2L192.6,452.4L198.2,444.0L198.2,435.6L192.6,432.2L189.8,428.8L192.6,420.4L203.8,410.2L209.4,415.3L215.0,411.9L223.4,400.1L226.2,384.9L229.0,384.9L231.8,386.6L231.8,388.3L231.8,390.0L268.1,445.7L298.9,462.6ZM363.3,48.9L357.7,57.3L363.3,77.6L374.4,111.4L363.3,111.4L352.1,119.8L346.5,133.3L343.7,148.5L338.1,153.6L312.9,172.1L287.7,209.3L276.5,217.7L256.9,229.6L248.5,239.7L245.7,236.3L240.1,231.2L237.4,226.2L223.4,243.1L212.2,249.8L206.6,283.6L203.8,307.2L178.6,308.9L173.0,288.7L159.0,276.8L147.8,281.9L142.2,281.9L139.4,280.2L131.0,281.9L125.4,270.1L111.5,265.0L97.5,270.1L91.9,281.9L69.5,265.0L58.3,254.9L55.5,236.3L66.7,212.7L66.7,197.5L61.1,185.7L66.7,180.6L75.1,175.5L83.5,173.8L91.9,178.9L100.3,173.8L105.9,172.1L125.4,172.1L117.0,129.9L119.8,106.3L128.2,96.2L136.6,92.8L150.6,82.7L167.4,62.4L173.0,62.4L181.4,69.1L195.4,57.3L203.8,62.4L220.6,48.9L240.1,38.7L262.5,32.0L279.3,35.4L287.7,25.2L296.1,21.9L307.3,21.9L321.3,32.0L326.9,33.7L340.9,35.4L349.3,37.1L354.9,42.1L363.3,48.9Z"/>
+        <g id="relief" clip-path="url(#landclip)" filter="url(#soft)" aria-hidden="true"></g>
+        <path d="M298.9,462.6L329.7,449.1L343.7,464.3L343.7,486.2L324.1,491.3L298.9,491.3L259.7,466.0L248.5,459.2L231.8,469.3L223.4,474.4L212.2,493.0L201.0,501.4L189.8,498.0L192.6,477.8L189.8,469.3L189.8,459.2L192.6,452.4L198.2,444.0L198.2,435.6L192.6,432.2L189.8,428.8L192.6,420.4L203.8,410.2L209.4,415.3L215.0,411.9L223.4,400.1L226.2,384.9L229.0,384.9L231.8,386.6L231.8,388.3L231.8,390.0L268.1,445.7L298.9,462.6ZM363.3,48.9L357.7,57.3L363.3,77.6L374.4,111.4L363.3,111.4L352.1,119.8L346.5,133.3L343.7,148.5L338.1,153.6L312.9,172.1L287.7,209.3L276.5,217.7L256.9,229.6L248.5,239.7L245.7,236.3L240.1,231.2L237.4,226.2L223.4,243.1L212.2,249.8L206.6,283.6L203.8,307.2L178.6,308.9L173.0,288.7L159.0,276.8L147.8,281.9L142.2,281.9L139.4,280.2L131.0,281.9L125.4,270.1L111.5,265.0L97.5,270.1L91.9,281.9L69.5,265.0L58.3,254.9L55.5,236.3L66.7,212.7L66.7,197.5L61.1,185.7L66.7,180.6L75.1,175.5L83.5,173.8L91.9,178.9L100.3,173.8L105.9,172.1L125.4,172.1L117.0,129.9L119.8,106.3L128.2,96.2L136.6,92.8L150.6,82.7L167.4,62.4L173.0,62.4L181.4,69.1L195.4,57.3L203.8,62.4L220.6,48.9L240.1,38.7L262.5,32.0L279.3,35.4L287.7,25.2L296.1,21.9L307.3,21.9L321.3,32.0L326.9,33.7L340.9,35.4L349.3,37.1L354.9,42.1L363.3,48.9Z" fill="none" stroke="var(--muted)" stroke-width=".8" opacity=".55" style="vector-effect:non-scaling-stroke"/>
+        <g id="mun"><path class="mun" d="M227.8,365.8L215.6,354.4L219.1,343.1L227.8,365.8ZM192.9,499.9L187.6,446.5L192.9,446.5L185.9,420.7L199.9,409.4L215.6,417.5L229.6,380.3L240.1,407.8L257.5,420.7L273.3,449.8L303.0,467.5L327.5,448.2L343.2,462.7L336.2,488.5L299.5,486.9L261.0,457.8L234.8,456.2L224.3,474.0L192.9,499.9Z"/><path class="mun" d="M203.4,212.3L250.6,222.0L233.1,223.6L231.3,238.1L219.1,236.5L210.4,249.4L208.6,231.7L189.4,210.7L203.4,212.3Z"/><path class="mun" d="M192.9,62.0L210.4,108.9L199.9,112.1L194.6,150.9L219.1,160.6L224.3,194.5L203.4,212.3L189.4,210.7L168.4,210.7L161.4,196.1L136.9,192.9L126.5,170.3L128.2,160.6L114.2,150.9L117.7,115.3L133.4,95.9L171.9,65.3L182.4,78.2L192.9,62.0Z"/><path class="mun" d="M189.4,210.7L208.6,231.7L210.4,249.4L205.1,265.6L206.9,307.6L189.4,297.9L180.6,309.2L171.9,280.1L157.9,268.8L128.2,273.7L123.0,264.0L98.5,262.4L82.8,283.4L56.5,243.0L74.0,199.3L58.3,183.2L72.3,171.9L96.7,171.9L112.5,165.4L126.5,170.3L136.9,192.9L161.4,196.1L168.4,210.7L189.4,210.7Z"/><path class="mun" d="M350.2,70.1L315.2,79.8L301.2,78.2L292.5,89.5L280.3,134.7L269.8,147.6L252.3,142.8L233.1,112.1L210.4,108.9L192.9,62.0L215.6,62.0L222.6,47.5L233.1,58.8L243.6,42.6L276.8,41.0L283.8,28.1L304.7,21.6L324.0,45.9L350.2,42.6L364.2,62.0L350.2,70.1Z"/><path class="mun" d="M210.4,108.9L233.1,112.1L252.3,142.8L269.8,147.6L280.3,134.7L292.5,89.5L301.2,78.2L315.2,79.8L350.2,70.1L353.7,87.9L371.2,102.4L344.9,125.0L343.2,150.9L320.5,147.6L304.7,160.6L303.0,194.5L287.3,192.9L283.8,207.4L261.0,226.8L250.6,222.0L203.4,212.3L224.3,194.5L219.1,160.6L194.6,150.9L199.9,112.1L210.4,108.9Z"/></g>
+        <g id="roads"></g>
+        <g id="zones"></g>
+        <g id="towns"></g>
+        <g id="labels"></g>
+        <g id="marks"></g>
+      </svg>
+      <div class="zoombar">
+        <button id="zin" type="button" aria-label="Acercar">+</button>
+        <button id="zout" type="button" aria-label="Alejar">−</button>
+        <button id="zreset" type="button" aria-label="Ver todo" style="font-size:12px">⤢</button>
+      </div>
+      <div class="tip" id="tip" hidden></div>
+    </div>
+    <div class="radarbar">
+      <span class="eyebrow">Ver este encuadre en radar</span>
+      <a id="radWindy" href="https://www.windy.com/?radar,38.98,1.43,10" target="_blank" rel="noopener">Windy</a>
+      <a id="radRV" href="https://www.rainviewer.com/map.html?loc=38.98,1.43,9" target="_blank" rel="noopener">RainViewer</a>
+      <a href="https://www.aemet.es/es/eltiempo/observacion/radar" target="_blank" rel="noopener">Radar AEMET</a>
+    </div>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--live)"></i>Lluvia hoy en estación (l/m²)</span>
+      <span><i class="sw" style="background:var(--r3)"></i>Lluvia del episodio (l/m²)</span>
+      <span><svg width="12" height="12"><rect x="2" y="2" width="8" height="8" transform="rotate(45 6 6)" fill="var(--bad)"/></svg>Cortado o peligroso</span>
+      <span><svg width="12" height="12"><rect x="2" y="2" width="8" height="8" transform="rotate(45 6 6)" fill="var(--warn)"/></svg>Abierto, con precaución</span>
+      <span><svg width="12" height="12"><rect x="2" y="2" width="8" height="8" transform="rotate(45 6 6)" fill="var(--ok)"/></svg>Normalizado</span>
+      <span><svg width="12" height="12"><path d="M2 1L11 6L2 11Z" fill="var(--info)"/></svg>Vídeo o foto</span>
+      <span><svg width="16" height="6"><line x1="0" y1="3" x2="16" y2="3" stroke="var(--road)" stroke-width="3"/></svg>Carretera principal</span><span><svg width="16" height="6"><line x1="0" y1="3" x2="16" y2="3" stroke="var(--road2)" stroke-width="2" stroke-dasharray="5 3"/></svg>Carretera secundaria</span>
+    </div>
+    <p class="eyebrow" style="margin:0">Arrastra para moverte, rueda o pellizco para acercar. Costa simplificada (Natural Earth 1:10M), relieve orientativo y carreteras con trazado aproximado: no apto para navegar.</p>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:14px;min-width:0">
+    <div class="card detail" id="detail" aria-live="polite"></div>
+    <div class="card">
+      <h3>Lo que se ve en el mapa</h3>
+      <div class="list" id="list"></div>
+    </div>
+  </div>
+</div>
+
+<section class="sect" id="avisos">
+  <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;justify-content:space-between">
+    <h2>Avisos oficiales</h2>
+    <span class="fresh" id="feedFresh"><i></i><span id="feedFreshTxt"></span></span>
+  </div>
+  <p>Lo que han comunicado Protección Civil (Emergències 112), el Consell, los ayuntamientos y AEMET, del más reciente al más antiguo. Cada aviso indica quién lo emitió y dónde se publicó. Cuando el organismo solo lo publicó en X, el enlace lleva a la noticia que lo reproduce.</p>
+  <div class="seg" role="group" aria-label="Filtrar avisos" id="feedFilters"></div>
+  <div class="feed" id="feed"></div>
+</section>
+
+<section class="sect" id="access">
+  <h2>Cuándo volver a moverse</h2>
+  <ol style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px;max-width:72ch">
+    <li><b>Hasta el martes 20 a las 12:00</b> sigue el aviso de tormentas. La madrugada del martes es cuando más probable es que llueva. Evita torrentes, calas con torrente y garajes o sótanos.</li>
+    <li><b>Martes por la tarde</b> la probabilidad baja al 25–45 %. Es la primera ventana para moverse con normalidad, si Emergencias ha quitado la alerta roja.</li>
+    <li><b>Miércoles 21</b> AEMET da 0–10 % de lluvia. Las calas del noreste con torrente y los caminos de Sant Carles y Sant Vicent de sa Cala, mejor no antes, y comprobando que no hay piedras caídas.</li>
+  </ol>
+  <div class="warnbox">Una carretera reabierta puede volver a cerrarse: la del aeropuerto se reabrió el domingo y se cortó otra vez el lunes de madrugada. Mira los avisos de arriba o DGT antes de salir.</div>
+  <h3>Qué significa cada etiqueta</h3>
+  <dl class="gloss">
+    <dt style="color:var(--bad)">Cortado o peligroso</dt><dd>Cerrado al tráfico o con un aviso oficial de peligro (inundación, piedras caídas). No vayas.</dd>
+    <dt style="color:var(--warn)">Abierto, con precaución</dt><dd>Se puede pasar, pero se inundó hace poco o puede volver a inundarse si llueve fuerte.</dd>
+    <dt style="color:var(--ok)">Normalizado</dt><dd>Reabierto o resuelto según el organismo responsable.</dd>
+    <dt>Sin noticias recientes</dt><dd>Hubo un problema y no he encontrado ninguna actualización posterior.</dd>
+    <dt>Confirmado</dt><dd>El dato lo da un organismo oficial (AEMET, Emergencias, Consell, ayuntamiento), directamente o citado por la prensa.</dd>
+    <dt>Probable</dt><dd>Lo publica la prensa sin citar la fuente oficial, o la ubicación es aproximada.</dd>
+  </dl>
+</section>
+
+<section class="sect" id="live">
+  <h2>Seguir la lluvia en directo</h2>
+  <p>El mapa de esta página no puede mostrar el radar: estas webs sí. AEMET y RainViewer enseñan dónde llueve ahora; Blitzortung, los rayos; Windy, el viento y la previsión.</p>
+  <div class="live">
+    <a href="https://www.aemet.es/es/eltiempo/observacion/radar" target="_blank" rel="noopener"><b>Radar AEMET</b><span>Oficial. Radar regional de Palma.</span></a>
+    <a href="https://www.aemet.es/es/eltiempo/prediccion/avisos" target="_blank" rel="noopener"><b>Avisos AEMET</b><span>Zona Ibiza y Formentera.</span></a>
+    <a href="https://x.com/Emergencies_112" target="_blank" rel="noopener"><b>Emergències 112</b><span>Protección Civil de Baleares (X).</span></a>
+    <a href="https://x.com/Consell_Eivissa" target="_blank" rel="noopener"><b>Consell d’Eivissa</b><span>Carreteras y servicios (X).</span></a>
+    <a href="https://etraffic.dgt.es" target="_blank" rel="noopener"><b>DGT etraffic</b><span>Estado de carreteras.</span></a>
+    <a href="https://www.meteosat.com/tiempo/baleares/tiempo-ibiza.html" target="_blank" rel="noopener"><b>Lluvia de hoy en Eivissa</b><span>Datos de la estación de AEMET.</span></a>
+    <a href="https://map.blitzortung.org/#9/38.98/1.43" target="_blank" rel="noopener"><b>Blitzortung</b><span>Rayos en tiempo real.</span></a>
+    <a href="https://www.rainviewer.com/map.html?loc=38.98,1.43,9" target="_blank" rel="noopener"><b>RainViewer</b><span>Animación del radar.</span></a>
+  </div>
+</section>
+
+<section class="sect" id="sources">
+  <h2>Fuentes meteorológicas de Ibiza</h2>
+  <p>Ordenadas por autoridad: primero las oficiales, después las webs de lluvia, la prensa y las redes. “Comprobada” significa que la he consultado en esta búsqueda.</p>
+  <div class="tablewrap"><table><thead><tr><th>Fuente</th><th>Tipo</th><th>Canal</th><th>Qué aporta</th><th>Estado</th></tr></thead><tbody id="srcBody"></tbody></table></div>
+  <h3>Búsquedas y hashtags para redes</h3>
+  <div class="kw">
+    <code>#DANA</code><code>#thisisibiza</code><code>#inundaciones</code><code>#Eivissa</code><code>#Formentera</code><code>#Pitiüses</code><code>#ibizafloods</code>
+    <code>meteo Eivissa</code><code>temps Eivissa</code><code>aiguat Eivissa</code><code>torrentada</code><code>Ibiza weather</code><code>Ibiza storm</code><code>alerta roja Ibiza</code>
+  </div>
+</section>
+
+<footer>Datos recopilados desde el 18/10/2026 y actualizados cada hora hasta el miércoles 21. El relieve del mapa es orientativo y está difuminado a propósito; las carreteras tienen trazado aproximado. Las cifras de lluvia de distintas fuentes no siempre coinciden porque miden ventanas de tiempo distintas; cada ficha dice cuál es cuál.</footer>
+</div>
+
+<!--DATOS-INICIO--><script type="application/json" id="datos-vivos">
+{
+ "updatedAt": "2026-10-19T16:05:00Z",
+ "checkedAt": "2026-10-19T16:05:00Z",
+ "estado": {
+  "emergencias": {
+   "nivel": "rojo",
+   "titulo": "alerta roja",
+   "texto": "Plan Meteobal activo (IG-2) en Ibiza y Formentera, al menos hasta el martes 20."
+  },
+  "aemet": {
+   "nivel": "amarillo",
+   "titulo": "aviso amarillo",
+   "texto": "Lluvia de hasta 20 l/m² en 1 hora y tormentas hasta el martes a las 12:00."
+  },
+  "notaAhora": "Ahora: aviso amarillo hasta el martes 12:00. Emergencias espera que la lluvia vuelva de noche y de madrugada. AEMET da entre 85 y 100 % de probabilidad de lluvia el martes por la mañana en todos los municipios con dato: no hay una zona de la isla claramente más expuesta que otra."
+ },
+ "estaciones": [
+  {
+   "id": "eivissa",
+   "n": "Eivissa (estación AEMET)",
+   "lat": 38.912,
+   "lon": 1.425,
+   "mm": 83.4,
+   "hora": "lun 19, 16:00",
+   "url": "https://www.meteosat.com/tiempo/baleares/tiempo-ibiza.html",
+   "approx": true
+  },
+  {
+   "id": "formentera",
+   "n": "Formentera (estación AEMET)",
+   "lat": 38.7,
+   "lon": 1.45,
+   "mm": 26.6,
+   "hora": "lun 19, 16:00",
+   "url": "https://www.meteosat.com/tiempo/baleares/tiempo-formentera.html",
+   "approx": true
+  }
+ ],
+ "prob": [
+  {
+   "id": "eivissa",
+   "p": "100%",
+   "note": "mar 00–12 h",
+   "url": "https://www.aemet.es/es/eltiempo/prediccion/municipios/eivissa-id07026"
+  },
+  {
+   "id": "santjosep",
+   "p": "95%",
+   "note": "mar 00–06 h; 80% de 06 a 12 h",
+   "url": "https://www.aemet.es/en/eltiempo/prediccion/municipios/sant-josep-de-sa-talaia-id07048"
+  },
+  {
+   "id": "santaeularia",
+   "p": "85%",
+   "note": "dato para todo el martes",
+   "url": "https://www.aemet.es/en/eltiempo/prediccion/municipios/santa-eularia-des-riu-id07054"
+  },
+  {
+   "id": "formentera",
+   "p": "90%",
+   "note": "mar 00–12 h",
+   "url": "https://www.aemet.es/es/eltiempo/prediccion/municipios/formentera-san-francisco-javier-id07024"
+  },
+  {
+   "id": "santjoan",
+   "p": "s/d",
+   "note": "la página de AEMET no mostraba el martes",
+   "url": "https://www.aemet.es/es/eltiempo/prediccion/municipios/horas/tabla/sant-joan-de-labritja-id07050"
+  },
+  {
+   "id": "santantoni",
+   "p": "s/d",
+   "note": "la página de AEMET no mostraba el martes",
+   "url": "https://www.aemet.es/en/eltiempo/prediccion/municipios/horas/tabla/sant-antoni-de-portmany-id07046"
+  }
+ ],
+ "avisos": [
+  {
+   "ts": "2026-10-19T15:00",
+   "emisor": "AEMET",
+   "tipo": "aemet",
+   "nivel": "amarillo",
+   "texto": "Baja el aviso de naranja a amarillo desde las 15:00: lluvias de hasta 20 l/m² en una hora. Aviso amarillo por tormentas hasta las 12:00 del martes.",
+   "url": "https://www.periodicodeibiza.es/pitiusas/ibiza/2026/10/19/2732027/aemet-rebaja-amarillo-aviso-por-lluvias-ibiza-formentera.html",
+   "via": "Periódico de Ibiza"
+  },
+  {
+   "ts": "2026-10-19T14:30",
+   "emisor": "Emergències 112 (Protección Civil)",
+   "tipo": "proteccion",
+   "nivel": "rojo",
+   "texto": "Mantiene la alerta roja (IG-2 del Plan Meteobal) en Ibiza, Formentera y Mallorca al menos hasta el martes, aunque AEMET haya bajado su aviso. Pide no bajar la guardia: puede pasar de sol a 40–60 litros en pocas horas.",
+   "url": "https://lavozdeibiza.com/actualidad/aemet-reduce-el-peligro-por-lluvias-en-ibiza-pero-emergencias-advierte-de-que-el-riesgo-sigue-siendo-alto/",
+   "via": "La Voz de Ibiza"
+  },
+  {
+   "ts": "2026-10-19T14:00",
+   "emisor": "Emergències 112 (Protección Civil)",
+   "tipo": "proteccion",
+   "nivel": "info",
+   "texto": "Circula un bulo sobre la suspensión de clases el martes. La suspensión anunciada fue solo para el lunes 19.",
+   "url": "https://www.periodicodeibiza.es/pitiusas/ibiza/2026/10/19/2732027/aemet-rebaja-amarillo-aviso-por-lluvias-ibiza-formentera.html",
+   "via": "Periódico de Ibiza"
+  },
+  {
+   "ts": "2026-10-19T13:00",
+   "emisor": "Ajuntament d’Eivissa",
+   "tipo": "ayuntamiento",
+   "nivel": "fin",
+   "texto": "Circulación normalizada en la E-10, la avenida de Santa Eulària y la calle Pere Francés.",
+   "url": "https://www.noudiari.es/noticias-ibiza-formentera-sidebar/la-ciudad-de-ibiza-normaliza-la-circulacion-en-calles-y-avenidas-afectadas-por-la-dana/",
+   "via": "Noudiari"
+  },
+  {
+   "ts": "2026-10-19T12:30",
+   "emisor": "Ajuntament de Santa Eulària",
+   "tipo": "ayuntamiento",
+   "nivel": "fin",
+   "texto": "Reabiertas las carreteras de es Figueral, Cala Llenya, Cala Mestella, Morna y Atzaró. Algunas calles urbanas siguen cerradas. 77 l/m² en 6 horas hasta las 12:00.",
+   "url": "https://periodicodeibiza.es/pitiusas/ibiza/2026/10/19/2732047/inundaciones-golpean-santa-eularia-roca-gigante-cae-sobre-carretera.html",
+   "via": "Periódico de Ibiza"
+  },
+  {
+   "ts": "2026-10-19T12:00",
+   "emisor": "Consell d’Eivissa",
+   "tipo": "consell",
+   "nivel": "fin",
+   "texto": "Reabierta la carretera del aeropuerto. Siguen las acumulaciones de agua en la rotonda de Jesús y las entradas a Vila, y el aviso de desprendimientos en el norte.",
+   "url": "https://www.periodicodeibiza.es/pitiusas/ibiza/2026/10/19/2731841/reabren-carretera-del-aeropuerto-ibiza-tras-inundaciones.html",
+   "via": "Periódico de Ibiza"
+  },
+  {
+   "ts": "2026-10-19T12:00",
+   "emisor": "Ajuntament de Sant Josep",
+   "tipo": "ayuntamiento",
+   "nivel": "naranja",
+   "texto": "Mantiene activado el Plan de Emergencias Municipal.",
+   "url": "https://forbes.es/sin-categorizar/1048429/apagones-carreteras-cortadas-y-caos-en-el-aeropuerto-ibiza-y-formentera-se-llevan-la-peor-parte-del-temporal/",
+   "via": "Forbes"
+  },
+  {
+   "ts": "2026-10-19T11:45",
+   "emisor": "Consell d’Eivissa",
+   "tipo": "consell",
+   "nivel": "amarillo",
+   "texto": "Autobuses en servicio; en la estación (Cetis) solo se usan las paradas exteriores. Dificultades para circular por Sant Jordi, ses Salines y Platja d’en Bossa.",
+   "url": "https://lavozdeibiza.com/actualidad/la-dana-adam-complica-a-los-autobuses-en-ibiza-el-cetis-solo-utiliza-paradas-exteriores/",
+   "via": "La Voz de Ibiza"
+  },
+  {
+   "ts": "2026-10-19T10:30",
+   "emisor": "Emergències 112 (Protección Civil)",
+   "tipo": "proteccion",
+   "nivel": "rojo",
+   "texto": "Nuevo ES-Alert en Ibiza. Preocupación en Santa Eulària y Sant Joan por torrentes desbordados; descargas súbitas difíciles de prever hasta bien entrada la tarde.",
+   "url": "https://www.noudiari.es/local-ibiza/preocupacion-por-el-azote-de-adam-en-santa-eularia-y-sant-joan-con-algunos-torrentes-desbordados/",
+   "via": "Noudiari"
+  },
+  {
+   "ts": "2026-10-19T09:00",
+   "emisor": "Consell d’Eivissa",
+   "tipo": "consell",
+   "nivel": "rojo",
+   "texto": "Cortada la carretera del aeropuerto (km 3 a 5,5) en ambos sentidos. Cerradas las glorietas de Jesús y es Gorg. Reabiertas a las 09:00 las del puerto y la avenida de Santa Eulària. Peligro de desprendimientos en Sant Carles y Sant Vicent de sa Cala.",
+   "url": "https://www.eleconomista.es/actualidad/noticias/14021819/10/26/caos-circulatorio-por-la-dana-adam-en-ibiza-cortada-la-carretera-del-aeropuerto-y-varias-rotondas-clave.html",
+   "via": "elEconomista y Noudiari"
+  },
+  {
+   "ts": "2026-10-19T08:00",
+   "emisor": "AEMET",
+   "tipo": "aemet",
+   "nivel": "naranja",
+   "texto": "Aviso naranja por lluvias hasta las 14:59: hasta 160 l/m² en 12 horas, que podrían caer en 5 o 6 horas.",
+   "url": "https://www.periodicodeibiza.es/pitiusas/ibiza/2026/10/19/2732027/aemet-rebaja-amarillo-aviso-por-lluvias-ibiza-formentera.html",
+   "via": "Periódico de Ibiza"
+  },
+  {
+   "ts": "2026-10-18T19:00",
+   "emisor": "Govern balear",
+   "tipo": "proteccion",
+   "nivel": "naranja",
+   "texto": "Suspendidas las clases el lunes 19 en Ibiza, Formentera y Mallorca por el riesgo de inundaciones.",
+   "url": "https://www.ultimahora.es/noticias/local/2026/10/18/2731507/suspendidas-clases-este-lunes-mallorca-ibiza-formentera-por-dana-adam.html",
+   "via": "Última Hora"
+  },
+  {
+   "ts": "2026-10-18T11:50",
+   "emisor": "Emergències 112 (Protección Civil)",
+   "tipo": "proteccion",
+   "nivel": "rojo",
+   "texto": "Alerta roja (IG-2 del Plan Meteobal). Segundo ES-Alert: suspendidas todas las actividades deportivas, sociales y culturales al aire libre.",
+   "url": "https://www.periodicodeibiza.es/pitiusas/ibiza/2026/10/19/2731579/dana-adam-sume-caos-ibiza-formentera-mas-100-litros-decenas-incidencias.html",
+   "via": "Periódico de Ibiza"
+  },
+  {
+   "ts": "2026-10-18T11:20",
+   "emisor": "Emergències 112 (Protección Civil)",
+   "tipo": "proteccion",
+   "nivel": "rojo",
+   "texto": "ES-Alert a los móviles: máxima precaución, evitar desplazamientos innecesarios y alejarse de cauces y torrentes. No dejar objetos que pueda arrastrar el agua ni bajar a sótanos o garajes.",
+   "url": "https://www.eldiario.es/illes-balears/sociedad/govern-emite-alert-riesgo-inundacion-ibiza-formentera_1_13595203.html",
+   "via": "elDiario.es"
+  },
+  {
+   "ts": "2026-10-18T10:51",
+   "emisor": "Consell d’Eivissa",
+   "tipo": "consell",
+   "nivel": "rojo",
+   "texto": "Cortada la carretera del aeropuerto en ambos sentidos a la altura de la rotonda de Platja d’en Bossa. Eviten desplazamientos.",
+   "url": "https://www.periodicodeibiza.es/pitiusas/ibiza/2026/10/18/2731229/cortada-carretera-del-aeropuerto-ibiza-ambos-sentidos.html",
+   "via": "Periódico de Ibiza"
+  }
+ ],
+ "incidencias": {},
+ "incidenciasNuevas": []
+}
+</script><!--DATOS-FIN-->
+<script>
+const LON0=1.14, LAT0=39.14, K=1000, C=Math.cos(39*Math.PI/180);
+const xy=(lat,lon)=>[(lon-LON0)*C*K,(LAT0-lat)*K];
+const unxy=(x,y)=>[LAT0-y/K, x/(C*K)+LON0];
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+/* Fuentes. r = rango de autoridad (1 oficial directo, 2 oficial citado por prensa, 3 web de datos, 4 prensa) ; o = organismo que dio el dato */
+const S={
+  aemetMapa:{t:"AEMET Baleares en X, recogido por La Voz de Ibiza",o:"AEMET",r:2,u:"https://lavozdeibiza.com/actualidad/el-mapa-de-las-lluvias-de-la-dana-adam-en-ibiza-el-aeropuerto-la-zona-mas-castigada/"},
+  cecopi:{t:"CECOPI del lunes (datos AEMET), recogido por Noudiari",o:"Emergencias / AEMET",r:2,u:"https://www.noudiari.es/local-ibiza/ibiza-y-formentera-siguen-en-alerta-roja-tras-acumular-hasta-190-litros-de-lluvia/"},
+  ara:{t:"Ara Balears · La DANA desborda la Llavanera",o:"Prensa",r:4,u:"https://es.arabalears.cat/sociedad/dana-desborda-llavanera-vuelve-inundar-negocios-pratet-ibiza_1_5883663.html"},
+  caos:{t:"Aena y 112, recogidos por Periódico de Ibiza",o:"Aena / Emergencias",r:2,u:"https://www.periodicodeibiza.es/pitiusas/ibiza/2026/10/19/2731579/dana-adam-sume-caos-ibiza-formentera-mas-100-litros-decenas-incidencias.html"},
+  esalert:{t:"El Debate · ES-Alert y acumulados del domingo",o:"Prensa",r:4,u:"https://www.eldebate.com/espana/baleares/20261018/baleares-envia-alert-poblacion-ante-riesgo-inundaciones-dana-adam_470997.html"},
+  debate:{t:"El Debate · Calles inundadas y carreteras cortadas",o:"Prensa",r:4,u:"https://www.eldebate.com/espana/baleares/20261018/adam-golpea-ibiza-calles-inundadas-carreteras-cortadas-riesgo-lluvias-torrenciales_470863.html"},
+  santaE:{t:"Ajuntament de Santa Eulària, recogido por Periódico de Ibiza",o:"Ajuntament de Santa Eulària",r:2,u:"https://periodicodeibiza.es/pitiusas/ibiza/2026/10/19/2732047/inundaciones-golpean-santa-eularia-roca-gigante-cae-sobre-carretera.html"},
+  torrentadas:{t:"Ajuntament de Santa Eulària, recogido por Noudiari",o:"Ajuntament de Santa Eulària",r:2,u:"https://www.noudiari.es/local-ibiza/adam-deja-varias-torrentadas-en-santa-eularia-tras-dos-dias-de-intensas-lluvias/"},
+  garriz:{t:"Director de Emergencias, recogido por Noudiari",o:"Emergències 112",r:2,u:"https://www.noudiari.es/local-ibiza/preocupacion-por-el-azote-de-adam-en-santa-eularia-y-sant-joan-con-algunos-torrentes-desbordados/"},
+  reabre:{t:"Consell d’Eivissa, recogido por Periódico de Ibiza",o:"Consell d’Eivissa",r:2,u:"https://www.periodicodeibiza.es/pitiusas/ibiza/2026/10/19/2731841/reabren-carretera-del-aeropuerto-ibiza-tras-inundaciones.html"},
+  forbes:{t:"Consell y Ajuntament de Sant Josep, recogidos por Forbes",o:"Consell / Sant Josep",r:2,u:"https://forbes.es/sin-categorizar/1048429/apagones-carreteras-cortadas-y-caos-en-el-aeropuerto-ibiza-y-formentera-se-llevan-la-peor-parte-del-temporal/"},
+  cortes:{t:"Consell d’Eivissa, recogido por elEconomista",o:"Consell d’Eivissa",r:2,u:"https://www.eleconomista.es/actualidad/noticias/14021819/10/26/caos-circulatorio-por-la-dana-adam-en-ibiza-cortada-la-carretera-del-aeropuerto-y-varias-rotondas-clave.html"},
+  bus:{t:"Consell d’Eivissa (11:45), recogido por La Voz de Ibiza",o:"Consell d’Eivissa",r:2,u:"https://lavozdeibiza.com/actualidad/la-dana-adam-complica-a-los-autobuses-en-ibiza-el-cetis-solo-utiliza-paradas-exteriores/"},
+  consellX:{t:"Consell d’Eivissa en X, citado por Noudiari",o:"Consell d’Eivissa",r:2,u:"https://www.noudiari.es/local-ibiza/carreteras-cortadas-y-servicios-generales-suspendidos-en-ibiza-este-lunes-ante-la-fuerza-de-adam/"},
+  vila:{t:"Ajuntament d’Eivissa, recogido por Noudiari",o:"Ajuntament d’Eivissa",r:2,u:"https://www.noudiari.es/noticias-ibiza-formentera-sidebar/la-ciudad-de-ibiza-normaliza-la-circulacion-en-calles-y-avenidas-afectadas-por-la-dana/"},
+  videos:{t:"La Voz de Ibiza · Todos los vídeos del paso de la DANA",o:"Prensa",r:4,u:"https://lavozdeibiza.com/actualidad/todos-los-videos-del-paso-de-la-dana-adam-por-ibiza-y-formentera/"},
+  pou:{t:"La Voz de Ibiza · Horas de terror en Santa Eulària",o:"Prensa",r:4,u:"https://lavozdeibiza.com/actualidad/no-se-si-la-casa-va-a-aguantar-o-se-va-a-ir-hacia-la-playa-horas-de-terror-en-santa-eularia-por-la-dana-que-azota-a-ibiza/"},
+  calas:{t:"La Voz de Ibiza · Cómo han quedado las calas de Santa Eulària",o:"Prensa",r:4,u:"https://lavozdeibiza.com/actualidad/las-imagenes-de-como-han-quedado-las-calas-de-santa-eularia-tras-la-dana-adam/"},
+  gc:{t:"Guardia Civil, recogido por La Voz de Ibiza",o:"Guardia Civil",r:2,u:"https://lavozdeibiza.com/actualidad/la-guardia-civil-muestra-como-han-quedado-los-aparcamientos-y-las-zonas-inundadas-de-ibiza-tras-la-dana-adam/"},
+  stjordi:{t:"Consell d’Eivissa, recogido por Periódico de Ibiza",o:"Consell d’Eivissa",r:2,u:"https://www.periodicodeibiza.es/pitiusas/ibiza/2026/10/18/2731229/cortada-carretera-del-aeropuerto-ibiza-ambos-sentidos.html"},
+  ronda:{t:"Periódico de Ibiza · Inundado el primer cinturón de ronda",o:"Prensa",r:4,u:"https://www.periodicodeibiza.es/pitiusas/ibiza/2026/10/18/2731237/inundado-primer-cinturon-ronda-ibiza-varias-calles-del-centro-ciudad.html"},
+  aero:{t:"Periódico de Ibiza · Caos en el aeropuerto",o:"Prensa",r:4,u:"https://www.periodicodeibiza.es/pitiusas/ibiza/2026/10/18/2731283/caos-aeropuerto-ibiza-goteras-interior-pista-cerrada.html"},
+  aena:{t:"Aena, recogido por Noudiari",o:"Aena",r:2,u:"https://noudiari.es/noticias-ibiza-formentera-sidebar/la-tormenta-provoca-27-cancelaciones-y-16-desvios-de-vuelos-en-el-aeropuerto-de-ibiza"},
+  aviso:{t:"AEMET y Emergencias, recogidos por Periódico de Ibiza",o:"AEMET / Emergencias",r:2,u:"https://www.periodicodeibiza.es/pitiusas/ibiza/2026/10/19/2732027/aemet-rebaja-amarillo-aviso-por-lluvias-ibiza-formentera.html"},
+  rebaja:{t:"Emergencias y AEMET, recogidos por La Voz de Ibiza",o:"Emergències 112",r:2,u:"https://lavozdeibiza.com/actualidad/aemet-reduce-el-peligro-por-lluvias-en-ibiza-pero-emergencias-advierte-de-que-el-riesgo-sigue-siendo-alto/"},
+  msIbz:{t:"Estación AEMET de Eivissa, vía meteosat.com",o:"AEMET",r:3,u:"https://www.meteosat.com/tiempo/baleares/tiempo-ibiza.html"},
+  msFor:{t:"Estación AEMET de Formentera, vía meteosat.com",o:"AEMET",r:3,u:"https://www.meteosat.com/tiempo/baleares/tiempo-formentera.html"},
+  aEiv:{t:"AEMET · Predicción Eivissa",o:"AEMET",r:1,u:"https://www.aemet.es/es/eltiempo/prediccion/municipios/eivissa-id07026"},
+  aJos:{t:"AEMET · Predicción Sant Josep",o:"AEMET",r:1,u:"https://www.aemet.es/en/eltiempo/prediccion/municipios/sant-josep-de-sa-talaia-id07048"},
+  aSE:{t:"AEMET · Predicción Santa Eulària",o:"AEMET",r:1,u:"https://www.aemet.es/en/eltiempo/prediccion/municipios/santa-eularia-des-riu-id07054"},
+  aFor:{t:"AEMET · Predicción Formentera",o:"AEMET",r:1,u:"https://www.aemet.es/es/eltiempo/prediccion/municipios/formentera-san-francisco-javier-id07024"},
+  aJoan:{t:"AEMET · Predicción Sant Joan",o:"AEMET",r:1,u:"https://www.aemet.es/es/eltiempo/prediccion/municipios/horas/tabla/sant-joan-de-labritja-id07050"},
+  aAnt:{t:"AEMET · Predicción Sant Antoni",o:"AEMET",r:1,u:"https://www.aemet.es/en/eltiempo/prediccion/municipios/horas/tabla/sant-antoni-de-portmany-id07046"}
+};
+const ST={activo:["Cortado o peligroso","st-activo","var(--bad)"],precaucion:["Abierto, con precaución","st-precaucion","var(--warn)"],normal:["Normalizado","st-normal","var(--ok)"],sin:["Sin noticias recientes","st-sin","var(--muted)"]};
+const TYN={lluvia:"Lluvia del episodio",estacion:"Lluvia de hoy",incidencia:"Corte o daño",zona:"Zona",medio:"Vídeo o foto"};
+const CONF={Seguro:"Confirmado",Probable:"Probable"};
+
+/* Pueblos y lugares (coordenadas aproximadas); m=1 principal */
+const TOWNS=[["Eivissa",38.9089,1.4328,1],["Sant Antoni",38.9806,1.3036,1],["Santa Eulària",38.9847,1.5333,1],["Sant Joan",39.0778,1.5133,1],["Sant Josep",38.9214,1.2944,1],["Sant Francesc",38.7056,1.4287,1],
+ ["Jesús",38.926,1.457,0],["Puig d’en Valls",38.933,1.416,0],["Sant Rafel",38.9669,1.396,0],["Santa Gertrudis",38.997,1.428,0],["Sant Miquel",39.058,1.441,0],["Port de Sant Miquel",39.084,1.444,0],["Sant Llorenç",39.030,1.474,0],["Portinatx",39.111,1.519,0],["Sant Carles",39.036,1.556,0],["Sant Vicent de sa Cala",39.079,1.560,0],["Cala de Sant Vicent",39.0758,1.590,0],["Es Figueral",39.059,1.594,0],["Es Canar",39.0005,1.5825,0],["Cala Llonga",38.953,1.523,0],["Talamanca",38.916,1.450,0],["Platja d’en Bossa",38.887,1.415,0],["Sant Jordi",38.8836,1.4068,0],["Ses Salines",38.840,1.396,0],["Aeropuerto",38.8728,1.3758,0],["Sant Agustí",38.937,1.288,0],["Cala Vedella",38.917,1.224,0],["Cala d’Hort",38.890,1.224,0],["Cala Comte",38.962,1.220,0],["Santa Agnès",39.033,1.345,0],["Sant Mateu",39.020,1.356,0],
+ ["La Savina",38.734,1.418,0],["Es Pujols",38.721,1.459,0],["Sant Ferran",38.706,1.458,0],["Es Caló",38.682,1.507,0],["El Pilar de la Mola",38.666,1.548,0]];
+/* Carreteras principales, trazado aproximado entre pueblos. k=1 principal, 2 secundaria */
+const ROADS=[
+ {n:"E-10 Eivissa–Sant Antoni",k:1,p:[[38.918,1.418],[38.940,1.408],[38.966,1.392],[38.975,1.350],[38.980,1.312]]},
+ {n:"E-20 ronda de Eivissa",k:1,p:[[38.895,1.420],[38.908,1.410],[38.924,1.414],[38.930,1.432],[38.926,1.452]]},
+ {n:"EI-800 carretera del aeropuerto",k:1,p:[[38.900,1.424],[38.893,1.417],[38.886,1.405],[38.878,1.390],[38.873,1.380]]},
+ {n:"Carretera Eivissa–Santa Eulària",k:1,p:[[38.926,1.452],[38.940,1.480],[38.958,1.505],[38.976,1.522],[38.985,1.530]]},
+ {n:"Carretera Eivissa–Sant Joan",k:1,p:[[38.930,1.432],[38.965,1.430],[38.997,1.428],[39.030,1.455],[39.060,1.495],[39.078,1.513]]},
+ {n:"Carretera Sant Joan–Portinatx",k:2,p:[[39.078,1.513],[39.095,1.500],[39.111,1.519]]},
+ {n:"Carretera Santa Gertrudis–Sant Miquel",k:2,p:[[38.997,1.428],[39.030,1.437],[39.058,1.441],[39.084,1.444]]},
+ {n:"EI-200 Santa Eulària–Sant Carles–Cala de Sant Vicent",k:2,p:[[38.985,1.533],[39.010,1.545],[39.036,1.556],[39.060,1.575],[39.0758,1.590]]},
+ {n:"EI-321 Sant Joan–Cala de Sant Vicent",k:2,p:[[39.078,1.513],[39.079,1.540],[39.079,1.560],[39.0758,1.590]]},
+ {n:"Carretera Santa Eulària–Es Canar",k:2,p:[[38.985,1.533],[38.993,1.560],[39.0005,1.5825]]},
+ {n:"Carretera Eivissa–Sant Josep–Sant Antoni",k:1,p:[[38.900,1.415],[38.905,1.360],[38.921,1.294],[38.950,1.285],[38.975,1.300]]},
+ {n:"Carretera Sant Jordi–Ses Salines",k:2,p:[[38.8836,1.4068],[38.860,1.400],[38.840,1.396]]},
+ {n:"Carretera Sant Antoni–Santa Agnès",k:2,p:[[38.982,1.310],[39.010,1.330],[39.033,1.345]]},
+ {n:"Carretera de Formentera (La Savina–La Mola)",k:1,p:[[38.734,1.418],[38.706,1.429],[38.706,1.458],[38.682,1.507],[38.666,1.548]]}
+];
+
+/* ph: fases. st: activo|precaucion|normal|sin. conf: Seguro|Probable */
+const D=[
+ {id:"r-aero",ty:"lluvia",lat:38.8728,lon:1.3758,v:190,ph:["d18","d19","all"],t:"Aeropuerto (es Codolar)",d:"AEMET: 122 l/m² en 24 h el domingo, 101,9 solo hasta el mediodía. En la reunión de Emergencias del lunes, AEMET dio 190 l/m² en las 24 h previas.",when:"Dom 18 – lun 19",conf:"Seguro",src:["cecopi","aemetMapa"]},
+ {id:"r-vila",ty:"lluvia",lat:38.9089,lon:1.4328,v:155,ph:["d18","d19","all"],t:"Eivissa ciudad",d:"AEMET: 68 l/m² el domingo. Reunión de Emergencias del lunes: 155 l/m² en 24 h. Ara Balears: 150 l/m² en 36 h, 80 de ellos desde las 03:00 del lunes.",when:"Dom 18 – lun 19",conf:"Seguro",src:["cecopi","aemetMapa","ara"]},
+ {id:"r-joan",ty:"lluvia",lat:39.0778,lon:1.5133,v:112,ph:["d19","all"],t:"Sant Joan de Labritja",d:"AEMET: 97 l/m² en 24 h. Reunión de Emergencias del lunes: 112 l/m².",when:"Lun 19",conf:"Seguro",src:["cecopi","aemetMapa"]},
+ {id:"r-se",ty:"lluvia",lat:38.9847,lon:1.5333,v:77,ph:["d19","all"],t:"Santa Eulària des Riu",d:"77 l/m² en solo 6 horas, hasta las 12:00 del lunes. Dato del ayuntamiento, no de AEMET.",when:"Lun 19, 06–12 h",conf:"Seguro",src:["santaE","torrentadas"]},
+ {id:"r-jordi",ty:"lluvia",lat:38.8836,lon:1.4068,v:69,ph:["d18","all"],t:"Sant Jordi",d:"69 l/m² el domingo. La noticia no dice de qué estación sale.",when:"Dom 18",conf:"Probable",src:["esalert"]},
+ {id:"r-rafel",ty:"lluvia",lat:38.9669,lon:1.3960,v:63,ph:["d18","all"],t:"Sant Rafel",d:"63 l/m² el domingo. La noticia no dice de qué estación sale.",when:"Dom 18",conf:"Probable",src:["esalert"]},
+ {id:"r-ant",ty:"lluvia",lat:38.9806,lon:1.3036,v:59,ph:["d18","all"],t:"Sant Antoni de Portmany",d:"AEMET: 59 l/m² en 24 h. El oeste fue la zona con menos lluvia.",when:"Dom 18",conf:"Seguro",src:["aemetMapa"]},
+ {id:"r-sfx",ty:"lluvia",lat:38.7056,lon:1.4287,v:195,ph:["d18","all"],t:"Formentera · Sant Francesc",d:"AEMET: 195 l/m² en 24 h, el máximo de las Pitiusas.",when:"Dom 18",conf:"Seguro",src:["aemetMapa"]},
+ {id:"r-for",ty:"lluvia",lat:38.680,lon:1.470,v:123,ph:["d18","all"],t:"Formentera · otra estación AEMET",approx:true,d:"AEMET: 123 l/m² en 24 h; 97,4 l/m² en una sola hora, entre las 08:00 y las 09:00 del domingo.",when:"Dom 18, 08–09 h",conf:"Seguro",src:["aemetMapa","caos"]},
+
+ {id:"z-sur",ty:"zona",shape:{lat:38.885,lon:1.405,rx:22,ry:16},kind:"past",ph:["d18","all"],t:"Aquí llovió fuerte el domingo",d:"La mayor parte del agua cayó el domingo por la mañana sobre el aeropuerto, Platja d’en Bossa, Sant Jordi y Vila. AEMET puso aviso rojo (hasta 90 l/m² en 1 h) de 10:00 a 13:59 y se enviaron dos ES-Alert a los móviles.",when:"Dom 18, mañana",conf:"Seguro",src:["caos","aemetMapa"]},
+ {id:"z-for",ty:"zona",shape:{lat:38.70,lon:1.44,rx:26,ry:14},kind:"past",ph:["d18","all"],t:"Aquí llovió fuerte el domingo: Formentera",d:"La isla con más lluvia: 195 l/m² y 53 incidencias el domingo, 38 de ellas locales inundados.",when:"Dom 18",conf:"Seguro",src:["caos"]},
+ {id:"z-ne",ty:"zona",shape:{lat:39.03,lon:1.555,rx:30,ry:30},kind:"past",ph:["d19","all"],t:"Aquí llovió fuerte el lunes: noreste",d:"Chubascos súbitos el lunes por la mañana en Santa Eulària y Sant Joan. Emergencias habló de núcleos muy activos que descargaban donde no estaba previsto. Torrentes desbordados en es Figueral, Cala Llenya, Cala Nova, sa Cala, Sant Carles y la serra de Morna.",when:"Lun 19, madrugada y mañana",conf:"Seguro",src:["garriz","ara"]},
+ {id:"z-tor",ty:"zona",shape:{lat:39.035,lon:1.565,rx:30,ry:30},kind:"now",st:"activo",ph:["now","all"],t:"Evitar: torrentes del noreste",d:"Los torrentes bajan cargados y pueden crecer aunque llueva poco. No cruces torrentes ni vados y no bajes a las calas donde desembocan. Además, el Consell avisa de piedras caídas en las carreteras de Sant Carles y Sant Vicent de sa Cala.",when:"Hasta el miércoles 21",acc:"No antes del miércoles, y solo si el Consell ha retirado el aviso.",conf:"Seguro",src:["consellX","garriz"]},
+ {id:"z-inund",ty:"zona",shape:{lat:38.895,lon:1.415,rx:18,ry:16},kind:"now",st:"precaucion",ph:["now","all"],t:"Evitar con lluvia fuerte: zonas bajas del sur",d:"Platja d’en Bossa, Sant Jordi, ses Salines, es Pratet y la carretera del aeropuerto se inundaron el domingo y otra vez el lunes de madrugada. Un chubasco fuerte puede volver a anegarlas.",when:"Hasta el martes 12:00",acc:"Se puede circular. Si llueve fuerte, evita bajos, garajes y pasos inferiores.",conf:"Seguro",src:["bus","reabre","ara"]},
+
+ {id:"i-ei800",ty:"incidencia",line:[[38.8955,1.4205],[38.8885,1.4075],[38.8800,1.3940]],lat:38.8885,lon:1.4075,ph:["d18","d19","now","all"],st:"normal",t:"Carretera del aeropuerto (km 3 a 5,5)",approx:true,d:"Cortada el domingo a las 10:51 junto a la rotonda y los túneles de Platja d’en Bossa. Reabierta el domingo por la tarde, cortada otra vez el lunes de madrugada y reabierta hacia las 12:00 del lunes.",when:"Reabierta lun ~12:00",acc:"Abierta. Puede volver a cerrarse con lluvia intensa.",conf:"Seguro",src:["reabre","forbes","caos"]},
+ {id:"i-aero",ty:"incidencia",lat:38.869,lon:1.369,ph:["d18","d19","now","all"],st:"precaucion",t:"Aeropuerto: pista y terminal",d:"Pista inundada y vuelos parados dos veces el domingo. Goteras en la terminal y acceso al P1 afectado. Aena: 27 cancelaciones y 16 desvíos el domingo. El lunes, retrasos.",when:"Dom 18 – lun 19",acc:"Funciona con retrasos. Consulta tu vuelo con la aerolínea.",conf:"Seguro",src:["aena","caos"]},
+ {id:"i-jesus",ty:"incidencia",lat:38.9203,lon:1.4547,ph:["d19","now","all"],st:"sin",t:"Glorieta de Jesús",d:"Cerrada el lunes por la mañana; a mediodía seguía con agua acumulada. Garaje inundado en la calle Paó. No he encontrado que se haya reabierto.",when:"Lun 19",acc:"Sin confirmar. Mira el Consell o DGT antes de pasar.",conf:"Seguro",src:["cortes","forbes","torrentadas"]},
+ {id:"i-gorg",ty:"incidencia",lat:38.9170,lon:1.4250,ph:["d19","all"],st:"sin",t:"Rotonda de es Gorg",approx:true,d:"Cerrada el lunes por la mañana. Después el Ayuntamiento de Ibiza dijo que la circulación estaba normalizada en la ciudad, sin nombrar esta rotonda.",when:"Lun 19",acc:"Probablemente abierta, sin confirmar.",conf:"Probable",src:["cortes","vila"]},
+ {id:"i-port",ty:"incidencia",lat:38.9140,lon:1.4405,ph:["d19","all"],st:"normal",t:"Rotonda del puerto y avenida de Santa Eulària",d:"Cortadas en las primeras horas del lunes; reabiertas a las 09:00.",when:"Reabiertas lun 09:00",acc:"Abiertas.",conf:"Seguro",src:["cortes","vila"]},
+ {id:"i-pratet",ty:"incidencia",lat:38.9130,lon:1.4360,ph:["d19","now","all"],st:"precaucion",t:"Es Pratet: se desbordó el torrente de sa Llavanera",d:"Agua dentro de varios locales entre el aparcamiento del Pratet y ses Feixes (calle Diputado Josep Ribas). El barrio ya se inundó en las DANAs de 2025.",when:"Lun 19, mañana",acc:"Calles abiertas. Evita bajos y garajes si vuelve a llover fuerte.",conf:"Seguro",src:["garriz","ara"]},
+ {id:"i-ronda",ty:"incidencia",lat:38.9125,lon:1.4295,ph:["d18","all"],st:"normal",t:"Primer cinturón de ronda · avenida de la Pau",approx:true,d:"Tramos convertidos en ríos el domingo. Normalizado el lunes según el ayuntamiento.",when:"Dom 18",acc:"Abierto.",conf:"Seguro",src:["vila","ronda","debate"]},
+ {id:"i-blanc",ty:"incidencia",lat:38.9235,lon:1.4190,ph:["d19","all"],st:"sin",t:"E-20: paso inferior de Blancadona",approx:true,d:"Tráfico desviado por arriba el lunes por la mañana. No hay actualización posterior.",when:"Lun 19, mañana",acc:"Sin confirmar.",conf:"Probable",src:["ara"]},
+ {id:"i-figue",ty:"incidencia",lat:38.9010,lon:1.4265,ph:["d18","all"],st:"normal",t:"Ses Figueretes: calle Port de la Savina",approx:true,d:"El agua bajó con fuerza por la calle hasta el paseo marítimo el domingo.",when:"Dom 18",acc:"Abierto.",conf:"Probable",src:["debate"]},
+ {id:"i-pdb",ty:"incidencia",lat:38.8880,lon:1.4140,ph:["d18","d19","now","all"],st:"precaucion",t:"Platja d’en Bossa: calles inundadas",d:"Calles principales inundadas el domingo. El lunes el Consell todavía avisaba de dificultades para circular.",when:"Dom 18 – lun 19",acc:"Se circula con dificultades.",conf:"Seguro",src:["bus","stjordi"]},
+ {id:"i-jordi",ty:"incidencia",lat:38.8836,lon:1.4068,ph:["d18","d19","now","all"],st:"precaucion",t:"Sant Jordi: centro inundado",d:"Centro completamente inundado el domingo (hay vídeo). El lunes, dificultades para circular según el Consell.",when:"Dom 18 – lun 19",acc:"Se circula con dificultades.",conf:"Seguro",src:["bus","stjordi"]},
+ {id:"i-sal",ty:"incidencia",lat:38.8450,lon:1.3930,ph:["d19","now","all"],st:"precaucion",t:"Ses Salines: dificultades para circular",approx:true,d:"El Consell avisó el lunes de dificultades para circular.",when:"Lun 19",acc:"Con precaución.",conf:"Seguro",src:["bus"]},
+ {id:"i-figueral",ty:"incidencia",lat:39.0600,lon:1.5880,ph:["d19","now","all"],st:"precaucion",t:"Es Figueral: carretera, roca caída y torrente",approx:true,d:"Carretera cortada el lunes por el agua y reabierta hacia las 12:30. Una roca grande cayó y obligó a cortar una calle. El torrente llegó desbordado a la playa.",when:"Reabierta lun ~12:30",acc:"Carretera abierta. Evita la desembocadura del torrente.",conf:"Seguro",src:["torrentadas","santaE"]},
+ {id:"i-llenya",ty:"incidencia",lat:39.0120,lon:1.5850,ph:["d19","now","all"],st:"precaucion",t:"Cala Llenya: carretera y torrente",approx:true,d:"Carretera cortada el lunes y reabierta hacia las 12:30. El torrente se desbordó y el mar avanzó sobre la arena.",when:"Reabierta lun ~12:30",acc:"Carretera abierta. Playa y torrente, no antes del miércoles.",conf:"Seguro",src:["santaE","calas"]},
+ {id:"i-mestella",ty:"incidencia",lat:39.0190,lon:1.5930,ph:["d19","all"],st:"normal",t:"Cala Mestella: rescatan a una persona",approx:true,d:"Carretera cortada y reabierta hacia las 12:30. El ayuntamiento sacó de allí a una persona que había pasado la noche con su coche.",when:"Lun 19",acc:"Carretera abierta.",conf:"Seguro",src:["torrentadas","santaE"]},
+ {id:"i-pou",ty:"incidencia",lat:39.0290,lon:1.5980,ph:["d19","all"],st:"precaucion",t:"Pou des Lleó: casa inundada",approx:true,d:"Una vecina tuvo que dejar su casa inundada el lunes por la mañana.",when:"Lun 19, 09:00",acc:"Zona de torrente: con precaución.",conf:"Probable",src:["pou"]},
+ {id:"i-morna",ty:"incidencia",lat:39.0250,lon:1.5100,ph:["d19","all"],st:"normal",t:"Carretera de Morna",approx:true,d:"Cortada el lunes por la crecida de torrentes; reabierta hacia las 12:30.",when:"Reabierta lun ~12:30",acc:"Abierta.",conf:"Seguro",src:["santaE","garriz"]},
+ {id:"i-atzaro",ty:"incidencia",lat:39.0300,lon:1.4800,ph:["d19","all"],st:"normal",t:"Carretera de Atzaró",approx:true,d:"Cortada el lunes; reabierta hacia las 12:30.",when:"Reabierta lun ~12:30",acc:"Abierta.",conf:"Seguro",src:["santaE"]},
+ {id:"i-carles",ty:"incidencia",lat:39.0360,lon:1.5560,ph:["d19","now","all"],st:"activo",t:"Sant Carles: peligro de piedras caídas",d:"El Consell avisó el lunes de peligro de desprendimientos en las carreteras de la zona. Torrentes muy crecidos.",when:"Aviso lun 19",acc:"Evitar si no es necesario, hasta que el Consell retire el aviso.",conf:"Seguro",src:["consellX","ara"]},
+ {id:"i-vicent",ty:"incidencia",lat:39.0790,lon:1.5597,ph:["d19","now","all"],st:"activo",t:"Sant Vicent de sa Cala: piedras caídas",d:"Aviso de desprendimientos del Consell. Emergencias habló de tres carreteras cortadas en la zona de sa Cala.",when:"Lun 19",acc:"Evitar hasta que confirmen la reapertura.",conf:"Seguro",src:["consellX","garriz"]},
+ {id:"i-riu",ty:"incidencia",lat:38.9880,lon:1.5240,ph:["d19","now","all"],st:"precaucion",t:"Río de Santa Eulària",approx:true,d:"Emergencias detectó en principio un desbordamiento en algún punto del río, que recoge el agua que baja desde Sant Joan.",when:"Lun 19",acc:"No te acerques al cauce.",conf:"Probable",src:["garriz"]},
+ {id:"i-savina",ty:"incidencia",lat:38.7340,lon:1.4170,ph:["d18","all"],st:"normal",t:"Formentera: La Savina sin luz",d:"70 clientes sin luz el domingo. Formentera ya la ha recuperado; en Ibiza quedaban 185 clientes sin electricidad el lunes (sin ubicación publicada).",when:"Dom 18",acc:"Restablecido.",conf:"Seguro",src:["caos","rebaja"]},
+
+ {id:"m-vila",ty:"medio",lat:38.9100,lon:1.4350,ph:["d18","all"],t:"Vídeos: calles de Vila y contenedores flotando",d:"Recopilación de vídeos de vecinos. Uno procede de la cuenta “thisisibiza”, según el nombre del archivo.",when:"Dom 18",conf:"Seguro",src:["videos"]},
+ {id:"m-aero",ty:"medio",lat:38.8760,lon:1.3800,ph:["d18","all"],t:"Vídeo: aeropuerto inundado",d:"Terminal y accesos con agua.",when:"Dom 18",conf:"Seguro",src:["videos","aero"]},
+ {id:"m-dron",ty:"medio",lat:38.8840,lon:1.4000,ph:["d18","d19","all"],t:"Foto de dron: carretera del aeropuerto",d:"Imagen aérea del tramo inundado.",when:"Dom 18 – lun 19",conf:"Seguro",src:["aemetMapa"]},
+ {id:"m-jordi",ty:"medio",lat:38.8800,lon:1.4120,ph:["d18","all"],t:"Vídeo: Sant Jordi inundado",d:"Publicado por Periódico de Ibiza.",when:"Dom 18",conf:"Seguro",src:["stjordi"]},
+ {id:"m-gc",ty:"medio",lat:38.8930,lon:1.4250,ph:["d19","all"],t:"Guardia Civil: zonas inundadas",d:"Recorrido de la Guardia Civil por aparcamientos y zonas castigadas.",when:"Lun 19",conf:"Seguro",src:["gc"]},
+ {id:"m-ume",ty:"medio",lat:38.9180,lon:1.4410,ph:["d18","d19","all"],t:"Vídeo: la UME sacando agua",d:"La UME llegó el domingo por la tarde y trabajó en bajos de locales y viviendas.",when:"Dom 18 – lun 19",conf:"Seguro",src:["videos","ara"]},
+ {id:"m-pena",ty:"medio",lat:38.9850,lon:1.5280,ph:["d18","all"],t:"Vídeo: campo de la Peña Deportiva anegado",d:"Campo de fútbol inundado en Santa Eulària.",when:"Dom 18",conf:"Probable",approx:true,src:["videos"]},
+ {id:"m-calas",ty:"medio",lat:39.0060,lon:1.5880,ph:["d19","all"],t:"Vídeo: torrentes de Cala Nova y Cala Llenya",d:"Grabado el lunes por la mañana y compartido en un grupo de Facebook.",when:"Lun 19, mañana",conf:"Seguro",approx:true,src:["calas"]},
+ {id:"m-pou",ty:"medio",lat:39.0250,lon:1.6020,ph:["d19","all"],t:"Vídeos: Pou des Lleó y Cala Mestella",d:"Cedidos por una vecina afectada.",when:"Lun 19",conf:"Seguro",approx:true,src:["pou"]},
+ {id:"m-figue",ty:"medio",lat:39.0650,lon:1.5920,ph:["d19","all"],t:"Foto: torrente de es Figueral en la playa",d:"Publicada por Noudiari.",when:"Lun 19",conf:"Seguro",approx:true,src:["torrentadas"]},
+ {id:"m-saona",ty:"medio",lat:38.6945,lon:1.3890,ph:["d18","all"],t:"Vídeo: Cala Saona (Formentera)",d:"Autor citado: Pablo Serra Serra.",when:"Dom 18",conf:"Seguro",src:["videos"]},
+ {id:"m-forlluvia",ty:"medio",lat:38.7120,lon:1.4500,ph:["d18","all"],t:"Vídeo: lluvia torrencial en Formentera",d:"Grabado cuando ya llevaba más de 130 litros. Autor citado: Jaume.",when:"Dom 18",conf:"Seguro",approx:true,src:["videos"]}
+];
+
+/* Datos que actualiza la tarea horaria: viven en el bloque JSON "datos-vivos" de esta misma página */
+let LIVE={};
+try{LIVE=JSON.parse(document.getElementById("datos-vivos").textContent)}catch(e){LIVE={}}
+const PROB_POS={eivissa:["Eivissa",38.945,1.455],santjosep:["Sant Josep",38.895,1.268],santaeularia:["Santa Eulària",39.000,1.475],formentera:["Formentera",38.735,1.495],santjoan:["Sant Joan",39.095,1.440],santantoni:["Sant Antoni",39.030,1.345]};
+let STATIONS=(LIVE.estaciones||[]).filter(s=>s.lat&&s.lon);
+let PROB=(LIVE.prob||[]).filter(p=>PROB_POS[p.id]).map(p=>({...p,n:PROB_POS[p.id][0],lat:PROB_POS[p.id][1],lon:PROB_POS[p.id][2]}));
+let AVISOS=LIVE.avisos||[];
+let ESTADO=null, INC_UPD={}, INC_NEW=[];
+function loadLive(d){
+  LIVE=d||{};
+  STATIONS=(LIVE.estaciones||[]).filter(s=>s.lat&&s.lon);
+  PROB=(LIVE.prob||[]).filter(p=>PROB_POS[p.id]).map(p=>({...p,n:PROB_POS[p.id][0],lat:PROB_POS[p.id][1],lon:PROB_POS[p.id][2]}));
+  AVISOS=LIVE.avisos||[];
+  ESTADO=LIVE.estado?{...LIVE.estado,updatedAt:LIVE.updatedAt,checkedAt:LIVE.checkedAt}:null;
+  INC_UPD=LIVE.incidencias||{};
+  INC_NEW=(LIVE.incidenciasNuevas||[]).filter(v=>v.id&&v.lat&&v.lon).map(v=>({ty:"incidencia",ph:["now","all"],st:"sin",conf:"Seguro",src:[],...v,srcUrl:v.url}));
+}
+loadLive(LIVE);
+
+const PHNOTE={
+ now:"Ahora: aviso amarillo hasta el martes 12:00. Emergencias espera que la lluvia vuelva de noche y de madrugada. AEMET da entre 85 y 100 % de probabilidad de lluvia el martes por la mañana en todos los municipios con dato: no hay una zona de la isla claramente más expuesta que otra.",
+ d19:"Lunes 19, de madrugada a mediodía: la segunda tanda descargó con fuerza en Vila y en el noreste (Santa Eulària, Sant Joan). Torrentes desbordados.",
+ d18:"Domingo 18: la tormenta descargó sobre el sur de Ibiza y Formentera por la mañana. Aviso rojo de AEMET de 10:00 a 13:59 y aeropuerto cerrado dos veces.",
+ all:"Todo el episodio a la vez."
+};
+
+let phase="now", layers={estacion:true,lluvia:true,prob:true,incidencia:true,zona:true,medio:true}, sel=null;
+try{const s=localStorage.getItem("danaPhase2");if(s&&PHNOTE[s])phase=s;}catch(e){}
+
+const NS="http://www.w3.org/2000/svg";
+const el=(n,a={},p)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e};
+const rainCol=v=>v>=150?"var(--r5)":v>=110?"var(--r4)":v>=75?"var(--r3)":v>=50?"var(--r2)":"var(--r1)";
+
+function allItems(){
+  const base=D.map(o=>INC_UPD[o.id]?Object.assign({},o,INC_UPD[o.id],{upd:true}):o);
+  const st=STATIONS.map(s=>({id:"e-"+s.id,ty:"estacion",lat:s.lat,lon:s.lon,v:s.mm,ph:["now","all"],t:s.n,d:`${s.mm} l/m² acumulados hoy, hasta las ${s.hora.split(", ")[1]||s.hora}.`,when:s.hora,conf:"Seguro",src:[],srcUrl:s.url,srcName:"Estación de AEMET (datos vía meteosat.com)",approx:s.approx}));
+  return base.concat(INC_NEW,st);
+}
+const visible=o=>layers[o.ty]&&(phase==="all"||o.ph.includes(phase));
+
+/* --- Vista con zoom y desplazamiento --- */
+const FULL={x:0,y:0,w:435,h:520};
+let vb={...FULL};
+const mapEl=document.getElementById("map");
+const zoomF=()=>435/vb.w;
+function setVB(n){
+  n.w=Math.min(Math.max(n.w,435/14),435); n.h=n.w*520/435;
+  n.x=Math.min(Math.max(n.x,-n.w*0.3),435-n.w*0.7); n.y=Math.min(Math.max(n.y,-n.h*0.3),520-n.h*0.7);
+  vb=n; mapEl.setAttribute("viewBox",`${n.x.toFixed(2)} ${n.y.toFixed(2)} ${n.w.toFixed(2)} ${n.h.toFixed(2)}`);
+  draw(); radarLinks();
+}
+function zoomAt(f,cx,cy){ if(cx==null){cx=vb.x+vb.w/2;cy=vb.y+vb.h/2;} const w=vb.w/f,h=vb.h/f; setVB({x:cx-(cx-vb.x)/f,y:cy-(cy-vb.y)/f,w,h}); }
+function toSvg(ev){const r=mapEl.getBoundingClientRect();return [vb.x+(ev.clientX-r.left)/r.width*vb.w, vb.y+(ev.clientY-r.top)/r.height*vb.h];}
+function radarLinks(){
+  const [lat,lon]=unxy(vb.x+vb.w/2,vb.y+vb.h/2); const z=Math.round(9+Math.log2(zoomF()));
+  document.getElementById("radWindy").href=`https://www.windy.com/?radar,${lat.toFixed(3)},${lon.toFixed(3)},${Math.min(z+1,14)}`;
+  document.getElementById("radRV").href=`https://www.rainviewer.com/map.html?loc=${lat.toFixed(3)},${lon.toFixed(3)},${Math.min(z,13)}`;
+}
+document.getElementById("zin").onclick=()=>zoomAt(1.6);
+document.getElementById("zout").onclick=()=>zoomAt(1/1.6);
+document.getElementById("zreset").onclick=()=>setVB({...FULL});
+mapEl.addEventListener("wheel",e=>{e.preventDefault();const [x,y]=toSvg(e);zoomAt(e.deltaY<0?1.25:0.8,x,y);},{passive:false});
+const ptrs=new Map(); let dragStart=null, pinch0=null, moved=false;
+mapEl.addEventListener("pointerdown",e=>{ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=false;
+  if(ptrs.size===1){dragStart={cx:e.clientX,cy:e.clientY,vb:{...vb}};}
+  if(ptrs.size===2){const [a,b]=[...ptrs.values()];pinch0={d:Math.hypot(a.x-b.x,a.y-b.y),vb:{...vb},mid:toSvg({clientX:(a.x+b.x)/2,clientY:(a.y+b.y)/2})};}
+});
+mapEl.addEventListener("pointermove",e=>{
+  if(!ptrs.has(e.pointerId))return; ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  const r=mapEl.getBoundingClientRect();
+  if(ptrs.size===2&&pinch0){const [a,b]=[...ptrs.values()];const f=Math.hypot(a.x-b.x,a.y-b.y)/pinch0.d;moved=true;
+    const w=pinch0.vb.w/f,h=pinch0.vb.h/f;const [mx,my]=pinch0.mid;setVB({x:mx-(mx-pinch0.vb.x)/f,y:my-(my-pinch0.vb.y)/f,w,h});return;}
+  if(dragStart){const dx=e.clientX-dragStart.cx,dy=e.clientY-dragStart.cy;if(Math.abs(dx)+Math.abs(dy)>5){moved=true;mapEl.classList.add("drag");try{mapEl.setPointerCapture(e.pointerId)}catch(_){}}
+    if(moved){hideTip();setVB({x:dragStart.vb.x-dx/r.width*dragStart.vb.w,y:dragStart.vb.y-dy/r.height*dragStart.vb.h,w:dragStart.vb.w,h:dragStart.vb.h});}}
+});
+const endPtr=e=>{ptrs.delete(e.pointerId);if(ptrs.size<2)pinch0=null;if(ptrs.size===0){dragStart=null;mapEl.classList.remove("drag");}};
+mapEl.addEventListener("pointerup",endPtr);mapEl.addEventListener("pointercancel",endPtr);
+
+/* --- Tooltip --- */
+const tip=document.getElementById("tip"), wrap=document.getElementById("mapwrap");
+function tipText(o){
+  if(o.ty==="lluvia")return `<b>${esc(o.t)}</b>${o.v} l/m² en el episodio · ${esc(o.when)}`;
+  if(o.ty==="estacion")return `<b>${esc(o.t)}</b>${o.v} l/m² hoy · ${esc(o.when)}`;
+  if(o.ty==="prob")return `<b>${esc(o.t)}</b>Probabilidad de lluvia ${esc(o.p)} · ${esc(o.note)}`;
+  if(o.ty==="road")return `<b>${esc(o.t)}</b>Trazado aproximado`;
+  if(o.ty==="town")return `<b>${esc(o.t)}</b>`;
+  return `<b>${esc(o.t)}</b>${o.st?ST[o.st][0]+" · ":""}${esc(o.when||"")}`;
+}
+function showTip(o,ev){tip.innerHTML=tipText(o);tip.hidden=false;const r=wrap.getBoundingClientRect();
+  let x=ev.clientX-r.left+12,y=ev.clientY-r.top+12;const tw=tip.offsetWidth,th=tip.offsetHeight;
+  if(x+tw>r.width-4)x=ev.clientX-r.left-tw-12; if(y+th>r.height-4)y=ev.clientY-r.top-th-12; tip.style.left=Math.max(4,x)+"px";tip.style.top=Math.max(4,y)+"px";}
+function hideTip(){tip.hidden=true;}
+function bind(g,o,clickable=true){
+  g.addEventListener("pointerenter",e=>showTip(o,e));g.addEventListener("pointermove",e=>{if(!tip.hidden)showTip(o,e)});g.addEventListener("pointerleave",hideTip);
+  g.addEventListener("focus",()=>{const b=g.getBoundingClientRect();showTip(o,{clientX:b.left+b.width/2,clientY:b.top+b.height/2})});g.addEventListener("blur",hideTip);
+  if(!clickable)return;
+  g.addEventListener("click",e=>{if(moved)return;const b=g.getBoundingClientRect();showTip(o,{clientX:b.left+b.width/2,clientY:b.top+b.height/2});select(o.id);});
+  g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();select(o.id)}});
+}
+
+/* --- Relieve orientativo (difuminado) --- */
+const RELIEF=[ /* lat, lon, rx, ry, intensidad */
+ [38.912,1.290,24,17,1],[38.895,1.245,15,10,.8],[38.930,1.255,10,8,.6],
+ [39.040,1.375,30,13,.9],[39.060,1.430,20,10,.75],[39.030,1.330,12,9,.6],
+ [39.020,1.510,18,12,.8],[39.070,1.560,18,12,.8],[39.095,1.515,14,9,.7],[39.000,1.470,12,8,.5],
+ [38.935,1.395,8,6,.4],[38.665,1.545,15,10,.85],[38.650,1.395,8,6,.35]];
+const PLAINS=[[38.900,1.405,22,12],[38.975,1.330,14,8],[38.990,1.420,18,10]];
+const SALT=[[38.838,1.392,9,6],[38.725,1.448,8,6],[38.733,1.432,5,4]];
+function drawRelief(){
+  const R=document.getElementById("relief");if(R.childElementCount)return;
+  for(const [la,lo,rx,ry] of PLAINS){const [x,y]=xy(la,lo);el("ellipse",{cx:x,cy:y,rx,ry,fill:"var(--plain)",opacity:.9},R);}
+  for(const [la,lo,rx,ry,k] of RELIEF){const [x,y]=xy(la,lo);el("ellipse",{cx:x,cy:y,rx,ry,fill:"var(--relief)",opacity:(.55*k).toFixed(2)},R);el("ellipse",{cx:x+rx*.15,cy:y-ry*.15,rx:rx*.55,ry:ry*.55,fill:"var(--relief)",opacity:(.5*k).toFixed(2)},R);}
+  for(const [la,lo,rx,ry] of SALT){const [x,y]=xy(la,lo);el("ellipse",{cx:x,cy:y,rx,ry,fill:"var(--salt)",opacity:.9},R);}
+}
+
+/* --- Dibujo --- */
+function sc(x,y){const s=1/Math.sqrt(zoomF());return `translate(${x} ${y}) scale(${s}) translate(${-x} ${-y})`;}
+function drawRoads(){
+  const R=document.getElementById("roads");R.innerHTML="";
+  for(const r of ROADS){const g=el("g",{},R);const pts=r.p.map(([a,b])=>xy(a,b).join(",")).join(" ");
+    el("polyline",{class:"road r"+r.k,points:pts},g);el("polyline",{points:pts,fill:"none",stroke:"transparent","stroke-width":8/zoomF()},g);
+    bind(g,{ty:"road",t:r.n},false);}
+}
+function drawTowns(){
+  const T=document.getElementById("towns");T.innerHTML="";const z=zoomF();
+  for(const [n,la,lo,m] of TOWNS){ if(!m&&z<1.8)continue; const [x,y]=xy(la,lo);const g=el("g",{transform:sc(x,y)},T);
+    el("circle",{cx:x,cy:y,r:m?2.6:1.8,fill:"var(--town)"},g);
+    const t=el("text",{x:x+4,y:y-3,"font-family":"Source Sans 3, sans-serif","font-size":m?10.5:9,"font-weight":m?600:400,fill:"var(--town)",stroke:"var(--land)","stroke-width":2.5,"paint-order":"stroke"},g);t.textContent=n;
+    bind(g,{ty:"town",t:n},false);}
+}
+function draw(){
+  hideTip();drawRelief();drawRoads();drawTowns();
+  const Z=document.getElementById("zones"),M=document.getElementById("marks"),L=document.getElementById("labels");
+  Z.innerHTML="";M.innerHTML="";L.innerHTML="";
+  const items=allItems();
+  for(const o of items.filter(o=>o.ty==="zona"&&visible(o))){
+    const [x,y]=xy(o.shape.lat,o.shape.lon);
+    const g=el("g",{class:"mk",tabindex:0,role:"button","aria-label":o.t},Z);
+    el("ellipse",{cx:x,cy:y,rx:o.shape.rx,ry:o.shape.ry,fill:o.kind==="past"?"url(#hatch)":"var(--zone-now)","fill-opacity":o.kind==="past"?1:.2,stroke:o.kind==="past"?"var(--zone-past)":"var(--warn)","stroke-width":sel===o.id?2.5:1,"vector-effect":"non-scaling-stroke","stroke-dasharray":o.kind==="past"?"0":"4 3"},g);
+    bind(g,o);
+  }
+  if(layers.prob&&(phase==="now"||phase==="all")){
+    for(const p of PROB){const [x,y]=xy(p.lat,p.lon);const o={id:"p-"+p.id,ty:"prob",t:"Probabilidad de lluvia · "+p.n,p:p.p,note:p.note};
+      const g=el("g",{transform:sc(x,y),class:"mk",tabindex:0,role:"button","aria-label":o.t+" "+p.p},L);
+      el("rect",{x:x-21,y:y-10,width:42,height:18,rx:3,fill:"var(--panel)",stroke:"var(--accent)","stroke-width":.9},g);
+      const t=el("text",{x:x,y:y+3,"text-anchor":"middle","font-family":"IBM Plex Mono, monospace","font-size":10.5,"font-weight":600,fill:"var(--accent)"},g);t.textContent=p.p;
+      bind(g,o,false);}
+  }
+  const order={estacion:0,lluvia:1,medio:2,incidencia:3};
+  const pts=items.filter(o=>o.ty!=="zona"&&visible(o)).sort((a,b)=>order[a.ty]-order[b.ty]||(b.v||0)-(a.v||0));
+  for(const o of pts){
+    const [x,y]=xy(o.lat,o.lon);
+    if(o.line&&o.ty==="incidencia"){el("polyline",{points:o.line.map(([a,b])=>xy(a,b).join(",")).join(" "),fill:"none",stroke:ST[o.st][2],"stroke-width":4,"vector-effect":"non-scaling-stroke","stroke-linecap":"round",opacity:.85},M);}
+    const g=el("g",{class:"mk",tabindex:0,role:"button","aria-label":o.t,transform:sc(x,y)},M);
+    const selW=sel===o.id?2.2:1, selC=sel===o.id?"var(--fg)":"var(--panel)";
+    if(o.ty==="lluvia"||o.ty==="estacion"){
+      const r=4+Math.sqrt(o.v)*1.05;
+      if(o.ty==="estacion"){el("circle",{cx:x,cy:y,r,fill:"var(--live)","fill-opacity":.88,stroke:selC,"stroke-width":selW},g);}
+      else el("circle",{cx:x,cy:y,r,fill:rainCol(o.v),"fill-opacity":.85,stroke:selC,"stroke-width":selW},g);
+      const t=el("text",{x:x,y:y+3.3,"text-anchor":"middle","font-family":"IBM Plex Mono, monospace","font-size":9.5,"font-weight":600,fill:o.ty==="estacion"||o.v>=75?"var(--panel)":"var(--fg)"},g);t.textContent=Math.round(o.v);
+    }else if(o.ty==="incidencia"){
+      el("rect",{x:x-5,y:y-5,width:10,height:10,transform:`rotate(45 ${x} ${y})`,fill:ST[o.st||"sin"][2],stroke:selC,"stroke-width":selW},g);
+    }else{
+      el("path",{d:`M${x-4.5} ${y-5.5}L${x+6.5} ${y}L${x-4.5} ${y+5.5}Z`,fill:"var(--info)",stroke:selC,"stroke-width":selW},g);
+    }
+    el("circle",{cx:x,cy:y,r:12,fill:"transparent"},g);
+    bind(g,o);
+  }
+  list();
+}
+function select(id){sel=id;draw();detail();}
+function srcList(arr,extraUrl,extraName){
+  const items=arr.map(k=>S[k]).filter(Boolean).sort((a,b)=>a.r-b.r);
+  let h=items.map(s=>`<li><a href="${s.u}" target="_blank" rel="noopener">${esc(s.t)}</a> <small>· origen: ${esc(s.o)}</small></li>`).join("");
+  if(extraUrl)h=`<li><a href="${esc(extraUrl)}" target="_blank" rel="noopener">${esc(extraName||"Fuente de la actualización")}</a></li>`+h;
+  return `<ul class="srcs">${h}</ul>`;
+}
+function detail(){
+  const box=document.getElementById("detail");const o=allItems().find(x=>x.id===sel);
+  if(!o){box.innerHTML=`<div class="eyebrow">Ficha</div><h3>Pasa el cursor o toca un punto</h3><p>Al pasar por encima verás qué es. Al tocarlo se abre aquí su ficha: dato, hora, si se puede pasar y de dónde sale la información.</p><p style="font-size:13.5px;color:var(--muted)">Lo más llovido del episodio: <span class="mono">195 l/m²</span> en Sant Francesc (Formentera). En Ibiza, <span class="mono">190</span> en el aeropuerto y <span class="mono">155</span> en Vila (24 h, dato de AEMET del lunes).</p>`;return;}
+  const st=o.st?`<span class="badge ${ST[o.st][1]}">${ST[o.st][0]}</span>`:"";
+  box.innerHTML=`<div class="eyebrow">${TYN[o.ty]}${o.approx?" · ubicación aproximada":""}${o.upd?" · actualizado":""}</div>
+  <h3>${esc(o.t)}${o.v!=null&&(o.ty==="lluvia"||o.ty==="estacion")?` <span class="mono" style="font-size:15px">· ${o.v} l/m²</span>`:""}</h3>
+  <div class="badges"><span class="badge mono">${esc(o.when||"")}</span>${st}<span class="badge">${CONF[o.conf]||"Probable"}</span></div>
+  <p>${esc(o.d)}</p>${o.acc?`<p><b>¿Se puede ir?</b> ${esc(o.acc)}</p>`:""}${srcList(o.src||[],o.srcUrl,o.srcName)}`;
+}
+function list(){
+  const box=document.getElementById("list");box.innerHTML="";
+  const order={zona:0,incidencia:1,estacion:2,lluvia:3,medio:4};const sto={activo:0,sin:1,precaucion:2,normal:3};
+  const items=allItems().filter(visible).sort((a,b)=>order[a.ty]-order[b.ty]||(sto[a.st]??9)-(sto[b.st]??9)||(b.v||0)-(a.v||0));
+  if(!items.length){box.innerHTML='<p style="padding:10px 4px;color:var(--muted);margin:0">Nada que mostrar con estas capas. Activa más arriba.</p>';return;}
+  for(const o of items){
+    const c=o.ty==="lluvia"?rainCol(o.v):o.ty==="estacion"?"var(--live)":o.ty==="medio"?"var(--info)":o.ty==="zona"?(o.kind==="past"?"var(--zone-past)":"var(--zone-now)"):ST[o.st||"sin"][2];
+    const b=document.createElement("button");b.className="row";b.type="button";
+    const right=(o.ty==="lluvia"||o.ty==="estacion")?o.v+" l/m²":(o.st?ST[o.st][0]:"");
+    b.innerHTML=`<span class="dot" style="background:${c}"></span><span style="min-width:0"><b>${esc(o.t)}</b><small>${TYN[o.ty]} · ${esc(o.when||"")}</small></span><span class="mono" style="font-size:12px;color:var(--muted);text-align:right">${esc(right)}</span>`;
+    b.addEventListener("click",()=>{select(o.id);if(o.lat){const [x,y]=xy(o.lat,o.lon);const w=Math.min(vb.w,435/2.5);setVB({x:x-w/2,y:y-w*520/435/2,w,h:w*520/435});}
+      document.getElementById("map").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"nearest"});});
+    box.appendChild(b);
+  }
+}
+document.querySelectorAll("[data-ph]").forEach(b=>b.addEventListener("click",()=>{phase=b.dataset.ph;try{localStorage.setItem("danaPhase2",phase)}catch(e){}sync();draw();}));
+document.querySelectorAll("[data-ly]").forEach(b=>b.addEventListener("click",()=>{layers[b.dataset.ly]=!layers[b.dataset.ly];sync();draw();}));
+function sync(){document.querySelectorAll("[data-ph]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.ph===phase));document.querySelectorAll("[data-ly]").forEach(b=>b.setAttribute("aria-pressed",layers[b.dataset.ly]));document.getElementById("phaseNote").textContent=PHNOTE[phase];}
+
+/* --- Avisos --- */
+const TIPO={proteccion:["Protección Civil",1],consell:["Consell",2],ayuntamiento:["Ayuntamientos",3],aemet:["AEMET",4],otros:["Otros",5]};
+const NIV={rojo:["Rojo","var(--red)"],naranja:["Naranja","var(--orange)"],amarillo:["Amarillo","var(--yellow)"],info:["Información","var(--r2)"],fin:["Reabierto / fin","var(--ok)"]};
+let feedF="todos";
+function fmt(ts){const d=new Date(ts);if(isNaN(d))return esc(ts);const dias=["dom","lun","mar","mié","jue","vie","sáb"];return `${dias[d.getDay()]} ${d.getDate()}, ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;}
+function feed(){
+  const f=document.getElementById("feedFilters");f.innerHTML="";
+  [["todos","Todos"],...Object.entries(TIPO).map(([k,v])=>[k,v[0]])].forEach(([k,n],i)=>{const b=document.createElement("button");b.type="button";b.id="ff-"+k;b.textContent=n;b.setAttribute("aria-pressed",k===feedF);b.onclick=()=>{feedF=k;feed()};f.appendChild(b);});
+  const box=document.getElementById("feed");
+  const items=AVISOS.filter(a=>feedF==="todos"||a.tipo===feedF).sort((a,b)=>(b.ts||"").localeCompare(a.ts||"")||(TIPO[a.tipo]?.[1]??9)-(TIPO[b.tipo]?.[1]??9));
+  box.innerHTML=items.length?items.map(a=>{const nv=NIV[a.nivel]||NIV.info;return `<div class="av"><div class="who"><time>${fmt(a.ts)}</time><span class="lvl" style="--c:${nv[1]}">${nv[0]}</span></div><div><b style="font-family:var(--f-disp);font-weight:600;font-size:15.5px">${esc(a.emisor)}</b><p>${esc(a.texto)}</p><small>${a.url?`<a href="${esc(a.url)}" target="_blank" rel="noopener">Ver la publicación</a>`:""}${a.via?` · publicado por ${esc(a.via)}`:""}</small></div></div>`}).join(""):'<p style="color:var(--muted);margin:10px 0">No hay avisos de este emisor.</p>';
+}
+
+/* --- Fuentes --- */
+const SRC=[
+ ["Emergències 112 Illes Balears (@Emergencies_112)","Protección Civil","X","Alertas del Plan Meteobal y balance de incidencias","Comprobada","https://x.com/Emergencies_112"],
+ ["ES-Alert (Govern balear)","Protección Civil","Mensaje al móvil","Avisos de emergencia; tres enviados en este episodio","Comprobada","https://www.eldiario.es/illes-balears/sociedad/govern-emite-alert-riesgo-inundacion-ibiza-formentera_1_13595203.html"],
+ ["Consell d’Eivissa (@Consell_Eivissa)","Consell","X","Cortes y reaperturas de carreteras, servicios cerrados","Comprobada (vía prensa)","https://x.com/Consell_Eivissa"],
+ ["Ajuntament d’Eivissa","Ayuntamiento","Web y redes","Calles cortadas en Vila, plan de emergencia","Comprobada (vía prensa)","https://www.noudiari.es/noticias-ibiza-formentera-sidebar/la-ciudad-de-ibiza-normaliza-la-circulacion-en-calles-y-avenidas-afectadas-por-la-dana/"],
+ ["Ajuntament de Santa Eulària","Ayuntamiento","Web y redes","Carreteras municipales, pluviómetro propio","Comprobada (vía prensa)","https://www.noudiari.es/local-ibiza/adam-deja-varias-torrentadas-en-santa-eularia-tras-dos-dias-de-intensas-lluvias/"],
+ ["Ajuntament de Sant Josep","Ayuntamiento","Web y redes","Plan de Emergencias Municipal","Comprobada (vía prensa)","https://forbes.es/sin-categorizar/1048429/apagones-carreteras-cortadas-y-caos-en-el-aeropuerto-ibiza-y-formentera-se-llevan-la-peor-parte-del-temporal/"],
+ ["Ajuntaments de Sant Antoni y Sant Joan, Consell de Formentera","Ayuntamiento","Web y redes","Incidencias locales","Sin publicaciones encontradas en este episodio","https://lavozdeibiza.com/actualidad/alerta-roja-en-directo-noche-en-vela-en-ibiza-ante-la-segunda-embestida-de-adam/"],
+ ["AEMET · avisos y predicción por municipio","AEMET","Web","Avisos y probabilidad de lluvia por franjas","Comprobada","https://www.aemet.es/es/eltiempo/prediccion/avisos"],
+ ["AEMET Baleares (@AEMET_Baleares)","AEMET","X","Lluvia acumulada por estación","Comprobada (vía prensa)","https://x.com/AEMET_Baleares"],
+ ["Radar AEMET","Web de lluvia","Web","Dónde llueve ahora","Comprobada","https://www.aemet.es/es/eltiempo/observacion/radar"],
+ ["Meteosat.com (estaciones AEMET Eivissa y Formentera)","Web de lluvia","Web","Lluvia acumulada hoy, por horas","Comprobada","https://www.meteosat.com/tiempo/baleares/tiempo-ibiza.html"],
+ ["IDEIB · zonas inundables y red de torrentes (Govern)","Web de lluvia","Visor de mapas","Mapa oficial de zonas con riesgo de inundación","Comprobada","https://ideib.caib.es/geoserveis/rest/services/public/GOIB_XarxaHidro_RiscInun_IB/MapServer"],
+ ["Windy · RainViewer · Blitzortung","Web de lluvia","Web y app","Radar, viento y rayos","Comprobadas como enlace","https://www.windy.com/?radar,38.98,1.43,10"],
+ ["Meteoclimatic · Balears Meteo","Web de lluvia","Web","Estaciones de aficionados","No verificadas en esta búsqueda","https://www.meteoclimatic.net"],
+ ["DGT etraffic","Tráfico","Web","Estado de carreteras","Recomendada por el Consell","https://etraffic.dgt.es"],
+ ["Aena · aeropuerto de Ibiza","Transporte","Web","Vuelos cancelados y desviados","Comprobada (vía prensa)","https://www.aena.es"],
+ ["Periódico de Ibiza · La Voz de Ibiza · Noudiari · Diario de Ibiza","Prensa local","Web, IG, TikTok, Telegram","Directos, fotos y vídeos","Comprobadas (Diario de Ibiza no)","https://www.periodicodeibiza.es"],
+ ["Ara Balears · Última Hora · IB3 · TEF TV","Prensa regional","Web, radio, TV","Seguimiento del episodio","Comprobadas (IB3 y TEF no)","https://es.arabalears.cat"],
+ ["@samurivas_meteo · @Canalcienciaym","Redes","X","Anticipo de modelos","Citadas por Noudiari","https://www.noudiari.es/local-ibiza/dana-retrograda-a-la-vista-ibiza-y-formentera-ante-un-final-de-semana-de-lluvias-intensas/"],
+ ["thisisibiza · everythingibiza · grupos de Facebook","Redes","Instagram, TikTok, Facebook","Vídeos de vecinos","Citadas por la prensa, no comprobadas","https://lavozdeibiza.com/actualidad/todos-los-videos-del-paso-de-la-dana-adam-por-ibiza-y-formentera/"]
+];
+document.getElementById("srcBody").innerHTML=SRC.map(r=>`<tr><td><a href="${r[5]}" target="_blank" rel="noopener">${esc(r[0])}</a></td><td>${esc(r[1])}</td><td>${esc(r[2])}</td><td>${esc(r[3])}</td><td>${esc(r[4])}</td></tr>`).join("");
+
+/* --- Frescura y datos en vivo --- */
+function ago(ts){const m=Math.round((Date.now()-new Date(ts))/60000);if(isNaN(m))return "";if(m<1)return "hace menos de 1 min";if(m<60)return `hace ${m} min`;const h=Math.floor(m/60);return `hace ${h} h ${m%60} min`;}
+function fresh(){
+  const f=document.getElementById("fresh"),t=document.getElementById("freshTxt"),ff=document.getElementById("feedFresh"),ft=document.getElementById("feedFreshTxt");
+  if(ESTADO&&ESTADO.updatedAt){const old=(Date.now()-new Date(ESTADO.updatedAt))>2*3600e3;
+    t.textContent=`Actualizado ${ago(ESTADO.updatedAt)}${ESTADO.checkedAt&&ESTADO.checkedAt!==ESTADO.updatedAt?` · última comprobación ${ago(ESTADO.checkedAt)}`:""}${old?" · puede estar desfasado":""}`;
+    f.classList.toggle("on",!old);ff.classList.toggle("on",!old);ft.textContent=t.textContent;}
+  else{t.textContent="Sin fecha de actualización";ft.textContent="";}
+}
+function applyEstado(){
+  if(!ESTADO)return;
+  if(ESTADO.emergencias){document.getElementById("emTitle").textContent="Emergencias: "+(ESTADO.emergencias.titulo||"");document.getElementById("emTxt").textContent=ESTADO.emergencias.texto||"";const lv=ESTADO.emergencias.nivel;document.getElementById("emTitle").parentElement.style.setProperty("--c",lv==="rojo"?"var(--red)":lv==="naranja"?"var(--orange)":lv==="amarillo"?"var(--yellow)":"var(--ok)");}
+  if(ESTADO.aemet){document.getElementById("aeTitle").textContent="AEMET: "+(ESTADO.aemet.titulo||"");document.getElementById("aeTxt").textContent=ESTADO.aemet.texto||"";const lv=ESTADO.aemet.nivel;document.getElementById("aeTitle").parentElement.style.setProperty("--c",lv==="rojo"?"var(--red)":lv==="naranja"?"var(--orange)":lv==="amarillo"?"var(--yellow)":"var(--ok)");}
+  if(ESTADO.notaAhora)PHNOTE.now=ESTADO.notaAhora;
+}
+setInterval(fresh,60000);
+
+function start(st){
+  st=st||{};
+  if(st.phase&&PHNOTE[st.phase])phase=st.phase;
+  if(st.layers)Object.assign(layers,st.layers);
+  if(st.sel)sel=st.sel;
+  if(st.feedF)feedF=st.feedF;
+  applyEstado();sync();setVB(st.vb?{...st.vb}:{...FULL});detail();feed();fresh();
+}
+window.claude?.hot?.snapshot?.(()=>({phase,layers,sel,vb,feedF}));
+/* En la web pública (GitHub Pages) los datos se leen de datos.json y se refrescan solos cada 5 minutos */
+async function poll(){
+  try{
+    const r=await fetch("datos.json?t="+Date.now(),{cache:"no-store"});
+    if(!r.ok)return;
+    const d=await r.json();
+    if(d&&(d.updatedAt!==LIVE.updatedAt||d.checkedAt!==LIVE.checkedAt)){loadLive(d);applyEstado();sync();draw();detail();feed();fresh();}
+  }catch(e){}
+}
+if(/^https?:$/.test(location.protocol)&&!/claude\.ai|claudeusercontent|claude\.site/.test(location.hostname)){poll();setInterval(poll,5*60000);document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")poll();});}
+if(window.claude?.hot?.ready)window.claude.hot.ready(start);else start(window.claude?.hot?.data??{});
+</script>
+
+</body>
+</html>

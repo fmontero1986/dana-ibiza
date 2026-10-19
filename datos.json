@@ -1,0 +1,216 @@
+{
+ "updatedAt": "2026-10-19T16:05:00Z",
+ "checkedAt": "2026-10-19T16:05:00Z",
+ "estado": {
+  "emergencias": {
+   "nivel": "rojo",
+   "titulo": "alerta roja",
+   "texto": "Plan Meteobal activo (IG-2) en Ibiza y Formentera, al menos hasta el martes 20."
+  },
+  "aemet": {
+   "nivel": "amarillo",
+   "titulo": "aviso amarillo",
+   "texto": "Lluvia de hasta 20 l/m² en 1 hora y tormentas hasta el martes a las 12:00."
+  },
+  "notaAhora": "Ahora: aviso amarillo hasta el martes 12:00. Emergencias espera que la lluvia vuelva de noche y de madrugada. AEMET da entre 85 y 100 % de probabilidad de lluvia el martes por la mañana en todos los municipios con dato: no hay una zona de la isla claramente más expuesta que otra."
+ },
+ "estaciones": [
+  {
+   "id": "eivissa",
+   "n": "Eivissa (estación AEMET)",
+   "lat": 38.912,
+   "lon": 1.425,
+   "mm": 83.4,
+   "hora": "lun 19, 16:00",
+   "url": "https://www.meteosat.com/tiempo/baleares/tiempo-ibiza.html",
+   "approx": true
+  },
+  {
+   "id": "formentera",
+   "n": "Formentera (estación AEMET)",
+   "lat": 38.7,
+   "lon": 1.45,
+   "mm": 26.6,
+   "hora": "lun 19, 16:00",
+   "url": "https://www.meteosat.com/tiempo/baleares/tiempo-formentera.html",
+   "approx": true
+  }
+ ],
+ "prob": [
+  {
+   "id": "eivissa",
+   "p": "100%",
+   "note": "mar 00–12 h",
+   "url": "https://www.aemet.es/es/eltiempo/prediccion/municipios/eivissa-id07026"
+  },
+  {
+   "id": "santjosep",
+   "p": "95%",
+   "note": "mar 00–06 h; 80% de 06 a 12 h",
+   "url": "https://www.aemet.es/en/eltiempo/prediccion/municipios/sant-josep-de-sa-talaia-id07048"
+  },
+  {
+   "id": "santaeularia",
+   "p": "85%",
+   "note": "dato para todo el martes",
+   "url": "https://www.aemet.es/en/eltiempo/prediccion/municipios/santa-eularia-des-riu-id07054"
+  },
+  {
+   "id": "formentera",
+   "p": "90%",
+   "note": "mar 00–12 h",
+   "url": "https://www.aemet.es/es/eltiempo/prediccion/municipios/formentera-san-francisco-javier-id07024"
+  },
+  {
+   "id": "santjoan",
+   "p": "s/d",
+   "note": "la página de AEMET no mostraba el martes",
+   "url": "https://www.aemet.es/es/eltiempo/prediccion/municipios/horas/tabla/sant-joan-de-labritja-id07050"
+  },
+  {
+   "id": "santantoni",
+   "p": "s/d",
+   "note": "la página de AEMET no mostraba el martes",
+   "url": "https://www.aemet.es/en/eltiempo/prediccion/municipios/horas/tabla/sant-antoni-de-portmany-id07046"
+  }
+ ],
+ "avisos": [
+  {
+   "ts": "2026-10-19T15:00",
+   "emisor": "AEMET",
+   "tipo": "aemet",
+   "nivel": "amarillo",
+   "texto": "Baja el aviso de naranja a amarillo desde las 15:00: lluvias de hasta 20 l/m² en una hora. Aviso amarillo por tormentas hasta las 12:00 del martes.",
+   "url": "https://www.periodicodeibiza.es/pitiusas/ibiza/2026/10/19/2732027/aemet-rebaja-amarillo-aviso-por-lluvias-ibiza-formentera.html",
+   "via": "Periódico de Ibiza"
+  },
+  {
+   "ts": "2026-10-19T14:30",
+   "emisor": "Emergències 112 (Protección Civil)",
+   "tipo": "proteccion",
+   "nivel": "rojo",
+   "texto": "Mantiene la alerta roja (IG-2 del Plan Meteobal) en Ibiza, Formentera y Mallorca al menos hasta el martes, aunque AEMET haya bajado su aviso. Pide no bajar la guardia: puede pasar de sol a 40–60 litros en pocas horas.",
+   "url": "https://lavozdeibiza.com/actualidad/aemet-reduce-el-peligro-por-lluvias-en-ibiza-pero-emergencias-advierte-de-que-el-riesgo-sigue-siendo-alto/",
+   "via": "La Voz de Ibiza"
+  },
+  {
+   "ts": "2026-10-19T14:00",
+   "emisor": "Emergències 112 (Protección Civil)",
+   "tipo": "proteccion",
+   "nivel": "info",
+   "texto": "Circula un bulo sobre la suspensión de clases el martes. La suspensión anunciada fue solo para el lunes 19.",
+   "url": "https://www.periodicodeibiza.es/pitiusas/ibiza/2026/10/19/2732027/aemet-rebaja-amarillo-aviso-por-lluvias-ibiza-formentera.html",
+   "via": "Periódico de Ibiza"
+  },
+  {
+   "ts": "2026-10-19T13:00",
+   "emisor": "Ajuntament d’Eivissa",
+   "tipo": "ayuntamiento",
+   "nivel": "fin",
+   "texto": "Circulación normalizada en la E-10, la avenida de Santa Eulària y la calle Pere Francés.",
+   "url": "https://www.noudiari.es/noticias-ibiza-formentera-sidebar/la-ciudad-de-ibiza-normaliza-la-circulacion-en-calles-y-avenidas-afectadas-por-la-dana/",
+   "via": "Noudiari"
+  },
+  {
+   "ts": "2026-10-19T12:30",
+   "emisor": "Ajuntament de Santa Eulària",
+   "tipo": "ayuntamiento",
+   "nivel": "fin",
+   "texto": "Reabiertas las carreteras de es Figueral, Cala Llenya, Cala Mestella, Morna y Atzaró. Algunas calles urbanas siguen cerradas. 77 l/m² en 6 horas hasta las 12:00.",
+   "url": "https://periodicodeibiza.es/pitiusas/ibiza/2026/10/19/2732047/inundaciones-golpean-santa-eularia-roca-gigante-cae-sobre-carretera.html",
+   "via": "Periódico de Ibiza"
+  },
+  {
+   "ts": "2026-10-19T12:00",
+   "emisor": "Consell d’Eivissa",
+   "tipo": "consell",
+   "nivel": "fin",
+   "texto": "Reabierta la carretera del aeropuerto. Siguen las acumulaciones de agua en la rotonda de Jesús y las entradas a Vila, y el aviso de desprendimientos en el norte.",
+   "url": "https://www.periodicodeibiza.es/pitiusas/ibiza/2026/10/19/2731841/reabren-carretera-del-aeropuerto-ibiza-tras-inundaciones.html",
+   "via": "Periódico de Ibiza"
+  },
+  {
+   "ts": "2026-10-19T12:00",
+   "emisor": "Ajuntament de Sant Josep",
+   "tipo": "ayuntamiento",
+   "nivel": "naranja",
+   "texto": "Mantiene activado el Plan de Emergencias Municipal.",
+   "url": "https://forbes.es/sin-categorizar/1048429/apagones-carreteras-cortadas-y-caos-en-el-aeropuerto-ibiza-y-formentera-se-llevan-la-peor-parte-del-temporal/",
+   "via": "Forbes"
+  },
+  {
+   "ts": "2026-10-19T11:45",
+   "emisor": "Consell d’Eivissa",
+   "tipo": "consell",
+   "nivel": "amarillo",
+   "texto": "Autobuses en servicio; en la estación (Cetis) solo se usan las paradas exteriores. Dificultades para circular por Sant Jordi, ses Salines y Platja d’en Bossa.",
+   "url": "https://lavozdeibiza.com/actualidad/la-dana-adam-complica-a-los-autobuses-en-ibiza-el-cetis-solo-utiliza-paradas-exteriores/",
+   "via": "La Voz de Ibiza"
+  },
+  {
+   "ts": "2026-10-19T10:30",
+   "emisor": "Emergències 112 (Protección Civil)",
+   "tipo": "proteccion",
+   "nivel": "rojo",
+   "texto": "Nuevo ES-Alert en Ibiza. Preocupación en Santa Eulària y Sant Joan por torrentes desbordados; descargas súbitas difíciles de prever hasta bien entrada la tarde.",
+   "url": "https://www.noudiari.es/local-ibiza/preocupacion-por-el-azote-de-adam-en-santa-eularia-y-sant-joan-con-algunos-torrentes-desbordados/",
+   "via": "Noudiari"
+  },
+  {
+   "ts": "2026-10-19T09:00",
+   "emisor": "Consell d’Eivissa",
+   "tipo": "consell",
+   "nivel": "rojo",
+   "texto": "Cortada la carretera del aeropuerto (km 3 a 5,5) en ambos sentidos. Cerradas las glorietas de Jesús y es Gorg. Reabiertas a las 09:00 las del puerto y la avenida de Santa Eulària. Peligro de desprendimientos en Sant Carles y Sant Vicent de sa Cala.",
+   "url": "https://www.eleconomista.es/actualidad/noticias/14021819/10/26/caos-circulatorio-por-la-dana-adam-en-ibiza-cortada-la-carretera-del-aeropuerto-y-varias-rotondas-clave.html",
+   "via": "elEconomista y Noudiari"
+  },
+  {
+   "ts": "2026-10-19T08:00",
+   "emisor": "AEMET",
+   "tipo": "aemet",
+   "nivel": "naranja",
+   "texto": "Aviso naranja por lluvias hasta las 14:59: hasta 160 l/m² en 12 horas, que podrían caer en 5 o 6 horas.",
+   "url": "https://www.periodicodeibiza.es/pitiusas/ibiza/2026/10/19/2732027/aemet-rebaja-amarillo-aviso-por-lluvias-ibiza-formentera.html",
+   "via": "Periódico de Ibiza"
+  },
+  {
+   "ts": "2026-10-18T19:00",
+   "emisor": "Govern balear",
+   "tipo": "proteccion",
+   "nivel": "naranja",
+   "texto": "Suspendidas las clases el lunes 19 en Ibiza, Formentera y Mallorca por el riesgo de inundaciones.",
+   "url": "https://www.ultimahora.es/noticias/local/2026/10/18/2731507/suspendidas-clases-este-lunes-mallorca-ibiza-formentera-por-dana-adam.html",
+   "via": "Última Hora"
+  },
+  {
+   "ts": "2026-10-18T11:50",
+   "emisor": "Emergències 112 (Protección Civil)",
+   "tipo": "proteccion",
+   "nivel": "rojo",
+   "texto": "Alerta roja (IG-2 del Plan Meteobal). Segundo ES-Alert: suspendidas todas las actividades deportivas, sociales y culturales al aire libre.",
+   "url": "https://www.periodicodeibiza.es/pitiusas/ibiza/2026/10/19/2731579/dana-adam-sume-caos-ibiza-formentera-mas-100-litros-decenas-incidencias.html",
+   "via": "Periódico de Ibiza"
+  },
+  {
+   "ts": "2026-10-18T11:20",
+   "emisor": "Emergències 112 (Protección Civil)",
+   "tipo": "proteccion",
+   "nivel": "rojo",
+   "texto": "ES-Alert a los móviles: máxima precaución, evitar desplazamientos innecesarios y alejarse de cauces y torrentes. No dejar objetos que pueda arrastrar el agua ni bajar a sótanos o garajes.",
+   "url": "https://www.eldiario.es/illes-balears/sociedad/govern-emite-alert-riesgo-inundacion-ibiza-formentera_1_13595203.html",
+   "via": "elDiario.es"
+  },
+  {
+   "ts": "2026-10-18T10:51",
+   "emisor": "Consell d’Eivissa",
+   "tipo": "consell",
+   "nivel": "rojo",
+   "texto": "Cortada la carretera del aeropuerto en ambos sentidos a la altura de la rotonda de Platja d’en Bossa. Eviten desplazamientos.",
+   "url": "https://www.periodicodeibiza.es/pitiusas/ibiza/2026/10/18/2731229/cortada-carretera-del-aeropuerto-ibiza-ambos-sentidos.html",
+   "via": "Periódico de Ibiza"
+  }
+ ],
+ "incidencias": {},
+ "incidenciasNuevas": []
+}
