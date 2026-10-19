@@ -1,18 +1,18 @@
 {
- "updatedAt": "2026-10-19T16:05:00Z",
- "checkedAt": "2026-10-19T16:05:00Z",
+ "updatedAt": "2026-10-19T19:35:22Z",
+ "checkedAt": "2026-10-19T19:35:22Z",
  "estado": {
   "emergencias": {
-   "nivel": "rojo",
-   "titulo": "alerta roja",
-   "texto": "Plan Meteobal activo (IG-2) en Ibiza y Formentera, al menos hasta el martes 20."
+   "nivel": "naranja",
+   "titulo": "alerta naranja",
+   "texto": "Baja de roja a naranja (Plan Meteobal IG-1) en Ibiza y Formentera tras la reunión del lunes por la tarde. El plan de inundaciones sigue en situación 2. Clases y actividades al aire libre se reanudan el martes."
   },
   "aemet": {
    "nivel": "amarillo",
    "titulo": "aviso amarillo",
-   "texto": "Lluvia de hasta 20 l/m² en 1 hora y tormentas hasta el martes a las 12:00."
+   "texto": "Lluvias y tormentas el martes. La lluvia vuelve esta madrugada y podría dejar unos 30 l/m² en una hora en algún punto."
   },
-  "notaAhora": "Ahora: aviso amarillo hasta el martes 12:00. Emergencias espera que la lluvia vuelva de noche y de madrugada. AEMET da entre 85 y 100 % de probabilidad de lluvia el martes por la mañana en todos los municipios con dato: no hay una zona de la isla claramente más expuesta que otra."
+  "notaAhora": "Alerta naranja de Emergencias y aviso amarillo de AEMET. Hoy han caído 83 l/m² en Vila y 27 en Formentera hasta las 16:00. Vuelve a llover esta madrugada, con lo más fuerte entre las 3 y las 7 según la previsión por horas; mejora el martes a mediodía y el miércoles AEMET da 0–5 % de lluvia."
  },
  "estaciones": [
   {
@@ -40,7 +40,7 @@
   {
    "id": "eivissa",
    "p": "100%",
-   "note": "mar 00–12 h",
+   "note": "mar 00–12 h; 40% por la tarde",
    "url": "https://www.aemet.es/es/eltiempo/prediccion/municipios/eivissa-id07026"
   },
   {
@@ -75,6 +75,33 @@
   }
  ],
  "avisos": [
+  {
+   "ts": "2026-10-19T19:50",
+   "emisor": "Emergències 112 (Protección Civil)",
+   "tipo": "proteccion",
+   "nivel": "naranja",
+   "texto": "Se cierra esta noche la carretera PM-820 de Formentera para que los bomberos trabajen y por si vuelve la lluvia fuerte. La UME se traslada de Formentera a Ibiza y se queda al menos hasta el martes.",
+   "url": "https://ultimahora.es/noticias/local/2026/10/19/2732333/emergencias-rebaja-alertas-por-lluvias-baleares-reanuda-este-martes-actividad-educativa.html",
+   "via": "Última Hora"
+  },
+  {
+   "ts": "2026-10-19T17:00",
+   "emisor": "Emergències 112 (Protección Civil)",
+   "tipo": "proteccion",
+   "nivel": "naranja",
+   "texto": "Baja la alerta de roja a naranja (IG-1 del Plan Meteobal) en Ibiza y Formentera. El plan de inundaciones sigue en situación operativa 2. Las clases y las actividades deportivas y culturales se reanudan el martes.",
+   "url": "https://ultimahora.es/noticias/local/2026/10/19/2732333/emergencias-rebaja-alertas-por-lluvias-baleares-reanuda-este-martes-actividad-educativa.html",
+   "via": "Última Hora"
+  },
+  {
+   "ts": "2026-10-19T12:48",
+   "emisor": "Consell de Formentera",
+   "tipo": "consell",
+   "nivel": "amarillo",
+   "texto": "59 incidencias en la isla, sin heridos. Las carreteras principales están abiertas, pero hay caminos rurales dañados: tramo cortado en Porto-salè, camí des Mal Pas cerrado y caminos de La Mola casi intransitables en coche.",
+   "url": "https://lavozdeibiza.com/actualidad/la-dana-adam-destroza-caminos-en-formentera-muros-derrumbados-y-vecinos-sin-poder-salir-en-coche/",
+   "via": "La Voz de Ibiza"
+  },
   {
    "ts": "2026-10-19T15:00",
    "emisor": "AEMET",
@@ -212,5 +239,42 @@
   }
  ],
  "incidencias": {},
- "incidenciasNuevas": []
+ "incidenciasNuevas": [
+  {
+   "id": "n-20261019-pm820",
+   "t": "Formentera: carretera PM-820 cerrada de noche",
+   "d": "Cierre nocturno de la carretera principal de Formentera para trabajos de los bomberos y por la previsión de lluvia fuerte.",
+   "st": "activo",
+   "acc": "Cerrada esta noche. Consulta antes de salir por la mañana.",
+   "when": "Lun 19, noche",
+   "url": "https://ultimahora.es/noticias/local/2026/10/19/2732333/emergencias-rebaja-alertas-por-lluvias-baleares-reanuda-este-martes-actividad-educativa.html",
+   "lat": 38.7,
+   "lon": 1.47,
+   "approx": true
+  },
+  {
+   "id": "n-20261019-portosale",
+   "t": "Formentera: Porto-salè, tramo cortado",
+   "d": "Torrentes desbordados y muros caídos sobre el camino; el Consell cortó un tramo.",
+   "st": "activo",
+   "acc": "Cortado.",
+   "when": "Lun 19, mediodía",
+   "url": "https://lavozdeibiza.com/actualidad/la-dana-adam-destroza-caminos-en-formentera-muros-derrumbados-y-vecinos-sin-poder-salir-en-coche/",
+   "lat": 38.712,
+   "lon": 1.405,
+   "approx": true
+  },
+  {
+   "id": "n-20261019-lamola",
+   "t": "Formentera: caminos de La Mola dañados",
+   "d": "Caminos rurales como el des Monestir casi intransitables en coche por desprendimientos y socavones.",
+   "st": "activo",
+   "acc": "Evita ir en coche por los caminos.",
+   "when": "Lun 19, mediodía",
+   "url": "https://lavozdeibiza.com/actualidad/la-dana-adam-destroza-caminos-en-formentera-muros-derrumbados-y-vecinos-sin-poder-salir-en-coche/",
+   "lat": 38.666,
+   "lon": 1.54,
+   "approx": true
+  }
+ ]
 }
