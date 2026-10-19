@@ -193,7 +193,7 @@ footer{font-size:12.5px;color:var(--muted)}
       <a href="https://www.aemet.es/es/eltiempo/observacion/radar" target="_blank" rel="noopener">Radar AEMET</a>
     </div>
     <div class="legend">
-      <span><i class="sw" style="background:var(--live)"></i>Lluvia hoy en estación (l/m²)</span>
+      <span><i class="sw" style="background:var(--live)"></i>Lluvia hoy en estación (l/m²); anillo = lloviendo en la última hora</span>
       <span><i class="sw" style="background:var(--r3)"></i>Lluvia del episodio (l/m²)</span>
       <span><svg width="12" height="12"><rect x="2" y="2" width="8" height="8" transform="rotate(45 6 6)" fill="var(--bad)"/></svg>Cortado o peligroso</span>
       <span><svg width="12" height="12"><rect x="2" y="2" width="8" height="8" transform="rotate(45 6 6)" fill="var(--warn)"/></svg>Abierto, con precaución</span>
@@ -268,7 +268,7 @@ footer{font-size:12.5px;color:var(--muted)}
   </div>
 </section>
 
-<footer>Datos recopilados desde el 18/10/2026 y actualizados cada hora hasta el miércoles 21. El relieve del mapa es orientativo y está difuminado a propósito; las carreteras tienen trazado aproximado. Las cifras de lluvia de distintas fuentes no siempre coinciden porque miden ventanas de tiempo distintas; cada ficha dice cuál es cuál.</footer>
+<footer>La lluvia de las estaciones de AEMET, los avisos de AEMET, la probabilidad de lluvia y los titulares de prensa se actualizan solos cada 20 minutos. Los avisos del Consell, ayuntamientos y Protección Civil y el estado de las carreteras se revisan a mano; si una ficha tiene varias horas, confirma en DGT o en el Consell. El relieve del mapa es orientativo y está difuminado a propósito; las carreteras tienen trazado aproximado. Las cifras de lluvia de distintas fuentes no siempre coinciden porque miden ventanas de tiempo distintas; cada ficha dice cuál es cuál.</footer>
 </div>
 
 <!--DATOS-INICIO--><script type="application/json" id="datos-vivos">
@@ -624,7 +624,7 @@ function loadLive(d){
   LIVE=d||{};
   STATIONS=(LIVE.estaciones||[]).filter(s=>s.lat&&s.lon);
   PROB=(LIVE.prob||[]).filter(p=>PROB_POS[p.id]).map(p=>({...p,n:PROB_POS[p.id][0],lat:PROB_POS[p.id][1],lon:PROB_POS[p.id][2]}));
-  AVISOS=LIVE.avisos||[];
+  AVISOS=(LIVE.avisos||[]).concat((LIVE.noticias||[]).map(n=>({ts:n.ts,emisor:n.medio+" · titular automático",tipo:"prensa",nivel:"info",texto:n.titulo,url:n.url,via:""})));
   ESTADO=LIVE.estado?{...LIVE.estado,updatedAt:LIVE.updatedAt,checkedAt:LIVE.checkedAt}:null;
   INC_UPD=LIVE.incidencias||{};
   INC_NEW=(LIVE.incidenciasNuevas||[]).filter(v=>v.id&&v.lat&&v.lon).map(v=>({ty:"incidencia",ph:["now","all"],st:"sin",conf:"Seguro",src:[],...v,srcUrl:v.url}));
@@ -647,7 +647,7 @@ const rainCol=v=>v>=150?"var(--r5)":v>=110?"var(--r4)":v>=75?"var(--r3)":v>=50?"
 
 function allItems(){
   const base=D.map(o=>INC_UPD[o.id]?Object.assign({},o,INC_UPD[o.id],{upd:true}):o);
-  const st=STATIONS.map(s=>({id:"e-"+s.id,ty:"estacion",lat:s.lat,lon:s.lon,v:s.mm,ph:["now","all"],t:s.n,d:`${s.mm} l/m² acumulados hoy, hasta las ${s.hora.split(", ")[1]||s.hora}.`,when:s.hora,conf:"Seguro",src:[],srcUrl:s.url,srcName:"Estación de AEMET (datos vía meteosat.com)",approx:s.approx}));
+  const st=STATIONS.map(s=>({id:"e-"+s.id,ty:"estacion",lat:s.lat,lon:s.lon,v:s.mm,ph:["now","all"],t:s.n,h1:s.h1,d:`${s.mm} l/m² acumulados hoy, hasta las ${s.hora.split(", ")[1]||s.hora}.`+(s.h1!=null?` En la última hora: ${s.h1} l/m².`:""),when:s.hora,conf:"Seguro",src:[],srcUrl:s.url,srcName:"Estación de AEMET (datos vía meteosat.com)",approx:s.approx}));
   return base.concat(INC_NEW,st);
 }
 const visible=o=>layers[o.ty]&&(phase==="all"||o.ph.includes(phase));
@@ -694,7 +694,7 @@ mapEl.addEventListener("pointerup",endPtr);mapEl.addEventListener("pointercancel
 const tip=document.getElementById("tip"), wrap=document.getElementById("mapwrap");
 function tipText(o){
   if(o.ty==="lluvia")return `<b>${esc(o.t)}</b>${o.v} l/m² en el episodio · ${esc(o.when)}`;
-  if(o.ty==="estacion")return `<b>${esc(o.t)}</b>${o.v} l/m² hoy · ${esc(o.when)}`;
+  if(o.ty==="estacion")return `<b>${esc(o.t)}</b>${o.v} l/m² hoy${o.h1!=null?` · ${o.h1} en la última hora`:""} · ${esc(o.when)}`;
   if(o.ty==="prob")return `<b>${esc(o.t)}</b>Probabilidad de lluvia ${esc(o.p)} · ${esc(o.note)}`;
   if(o.ty==="road")return `<b>${esc(o.t)}</b>Trazado aproximado`;
   if(o.ty==="town")return `<b>${esc(o.t)}</b>`;
@@ -769,7 +769,7 @@ function draw(){
     const selW=sel===o.id?2.2:1, selC=sel===o.id?"var(--fg)":"var(--panel)";
     if(o.ty==="lluvia"||o.ty==="estacion"){
       const r=4+Math.sqrt(o.v)*1.05;
-      if(o.ty==="estacion"){el("circle",{cx:x,cy:y,r,fill:"var(--live)","fill-opacity":.88,stroke:selC,"stroke-width":selW},g);}
+      if(o.ty==="estacion"){if((o.h1||0)>=0.2)el("circle",{cx:x,cy:y,r:r+4,fill:"none",stroke:"var(--live)","stroke-width":2,"stroke-dasharray":"3 2"},g);el("circle",{cx:x,cy:y,r,fill:"var(--live)","fill-opacity":.88,stroke:selC,"stroke-width":selW},g);}
       else el("circle",{cx:x,cy:y,r,fill:rainCol(o.v),"fill-opacity":.85,stroke:selC,"stroke-width":selW},g);
       const t=el("text",{x:x,y:y+3.3,"text-anchor":"middle","font-family":"IBM Plex Mono, monospace","font-size":9.5,"font-weight":600,fill:o.ty==="estacion"||o.v>=75?"var(--panel)":"var(--fg)"},g);t.textContent=Math.round(o.v);
     }else if(o.ty==="incidencia"){
@@ -818,7 +818,7 @@ document.querySelectorAll("[data-ly]").forEach(b=>b.addEventListener("click",()=
 function sync(){document.querySelectorAll("[data-ph]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.ph===phase));document.querySelectorAll("[data-ly]").forEach(b=>b.setAttribute("aria-pressed",layers[b.dataset.ly]));document.getElementById("phaseNote").textContent=PHNOTE[phase];}
 
 /* --- Avisos --- */
-const TIPO={proteccion:["Protección Civil",1],consell:["Consell",2],ayuntamiento:["Ayuntamientos",3],aemet:["AEMET",4],otros:["Otros",5]};
+const TIPO={proteccion:["Protección Civil",1],consell:["Consell",2],ayuntamiento:["Ayuntamientos",3],aemet:["AEMET",4],prensa:["Titulares de prensa",5],otros:["Otros",6]};
 const NIV={rojo:["Rojo","var(--red)"],naranja:["Naranja","var(--orange)"],amarillo:["Amarillo","var(--yellow)"],info:["Información","var(--r2)"],fin:["Reabierto / fin","var(--ok)"]};
 let feedF="todos";
 function fmt(ts){const d=new Date(ts);if(isNaN(d))return esc(ts);const dias=["dom","lun","mar","mié","jue","vie","sáb"];return `${dias[d.getDay()]} ${d.getDate()}, ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;}
@@ -868,7 +868,7 @@ function applyEstado(){
   if(!ESTADO)return;
   if(ESTADO.emergencias){document.getElementById("emTitle").textContent="Emergencias: "+(ESTADO.emergencias.titulo||"");document.getElementById("emTxt").textContent=ESTADO.emergencias.texto||"";const lv=ESTADO.emergencias.nivel;document.getElementById("emTitle").parentElement.style.setProperty("--c",lv==="rojo"?"var(--red)":lv==="naranja"?"var(--orange)":lv==="amarillo"?"var(--yellow)":"var(--ok)");}
   if(ESTADO.aemet){document.getElementById("aeTitle").textContent="AEMET: "+(ESTADO.aemet.titulo||"");document.getElementById("aeTxt").textContent=ESTADO.aemet.texto||"";const lv=ESTADO.aemet.nivel;document.getElementById("aeTitle").parentElement.style.setProperty("--c",lv==="rojo"?"var(--red)":lv==="naranja"?"var(--orange)":lv==="amarillo"?"var(--yellow)":"var(--ok)");}
-  if(ESTADO.notaAhora)PHNOTE.now=ESTADO.notaAhora;
+  if(ESTADO.notaAhora||ESTADO.notaAuto)PHNOTE.now=[ESTADO.notaAhora,ESTADO.notaAuto].filter(Boolean).join(" ");
 }
 setInterval(fresh,60000);
 
