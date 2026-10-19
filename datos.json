@@ -1,6 +1,6 @@
 {
- "updatedAt": "2026-10-19T19:35:22Z",
- "checkedAt": "2026-10-19T19:35:22Z",
+ "updatedAt": "2026-10-19T19:40:27Z",
+ "checkedAt": "2026-10-19T19:40:27Z",
  "estado": {
   "emergencias": {
    "nivel": "naranja",
@@ -275,6 +275,44 @@
    "lat": 38.666,
    "lon": 1.54,
    "approx": true
+  }
+ ],
+ "noticias": [
+  {
+   "ts": "2026-10-19T19:14",
+   "medio": "La Voz de Ibiza",
+   "titulo": "DANA Adam en Ibiza: Así sacaban vehículos que quedaron sumergidos en un parking de Es Canar",
+   "url": "https://lavozdeibiza.com/actualidad/dana-adam-en-ibiza-asi-sacaban-vehiculos-que-quedaron-sumergidos-en-un-parking-de-es-canar/"
+  },
+  {
+   "ts": "2026-10-19T19:11",
+   "medio": "La Voz de Ibiza",
+   "titulo": "Ibiza y Formentera retoman las clases este martes tras el temporal",
+   "url": "https://lavozdeibiza.com/actualidad/ibiza-y-formentera-retoman-las-clases-este-martes-tras-el-temporal/"
+  },
+  {
+   "ts": "2026-10-19T19:06",
+   "medio": "Noudiari",
+   "titulo": "Cinco vuelos cancelados y uno desviado en Ibiza por el paso de la dana",
+   "url": "https://www.noudiari.es/noticias-ibiza-formentera-sidebar/cinco-vuelos-cancelados-y-uno-desviado-en-ibiza-por-el-paso-de-la-dana/"
+  },
+  {
+   "ts": "2026-10-19T18:01",
+   "medio": "La Voz de Ibiza",
+   "titulo": "La DANA Adam deja ya 48 avisos a Bomberos de Ibiza por inundaciones y otros incidentes",
+   "url": "https://lavozdeibiza.com/actualidad/la-dana-adam-deja-ya-48-avisos-a-bomberos-de-ibiza-por-inundaciones-y-otros-incidentes/"
+  },
+  {
+   "ts": "2026-10-19T17:30",
+   "medio": "La Voz de Ibiza",
+   "titulo": "La dana Adam deja más vuelos cancelados en Ibiza",
+   "url": "https://lavozdeibiza.com/actualidad/vuelos-cancelados-y-desviados-por-la-lluvia-en-ibiza-y-palma/"
+  },
+  {
+   "ts": "2026-10-19T17:08",
+   "medio": "La Voz de Ibiza",
+   "titulo": "La Guardia Civil recorre las zonas más castigadas por el temporal en Ibiza",
+   "url": "https://lavozdeibiza.com/actualidad/la-guardia-civil-muestra-como-han-quedado-los-aparcamientos-y-las-zonas-inundadas-de-ibiza-tras-la-dana-adam/"
   }
  ]
 }
