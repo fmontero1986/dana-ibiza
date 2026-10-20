@@ -1,6 +1,6 @@
 {
- "updatedAt": "2026-10-19T22:49:02Z",
- "checkedAt": "2026-10-20T02:48:48Z",
+ "updatedAt": "2026-10-20T03:50:57Z",
+ "checkedAt": "2026-10-20T03:50:57Z",
  "estado": {
   "emergencias": {
    "nivel": "naranja",
@@ -75,6 +75,15 @@
   }
  ],
  "avisos": [
+  {
+   "ts": "2026-10-20T03:58",
+   "emisor": "Emergències 112 (Protección Civil)",
+   "tipo": "proteccion",
+   "nivel": "naranja",
+   "texto": "Balance hasta las 18:00 del lunes: 130 incidencias en Ibiza (56 en Santa Eulària, 39 en Vila, 21 en Sant Josep) y 65 en Formentera; 24 seguían pendientes en las Pitiusas. Este martes hay reunión de coordinación (CECOPI) desde el puesto de mando de sa Coma.",
+   "url": "https://www.periodicodeibiza.es/cronica-negra/local/2026/10/20/2732407/santa-eularia-lleva-peor-parte-segunda-jornada-lluvias-adam.html",
+   "via": "Periódico de Ibiza"
+  },
   {
    "ts": "2026-10-19T19:50",
    "emisor": "Emergències 112 (Protección Civil)",
@@ -274,6 +283,30 @@
    "url": "https://lavozdeibiza.com/actualidad/la-dana-adam-destroza-caminos-en-formentera-muros-derrumbados-y-vecinos-sin-poder-salir-en-coche/",
    "lat": 38.666,
    "lon": 1.54,
+   "approx": true
+  },
+  {
+   "id": "n-20261020-cetis",
+   "t": "Vila: estación de autobuses (CETIS) inutilizable por dentro",
+   "d": "El interior de la estación quedó inutilizado por el agua. Solo funcionan las paradas exteriores.",
+   "st": "activo",
+   "acc": "Coge el bus en las paradas de fuera.",
+   "when": "Lun 19",
+   "url": "https://www.periodicodeibiza.es/cronica-negra/local/2026/10/20/2732407/santa-eularia-lleva-peor-parte-segunda-jornada-lluvias-adam.html",
+   "lat": 38.9127,
+   "lon": 1.4296,
+   "approx": true
+  },
+  {
+   "id": "n-20261020-lajoya",
+   "t": "Cala Llenya (La Joya): sin luz",
+   "d": "Unos 50 clientes sin electricidad según Endesa, por los daños del agua en la zona.",
+   "st": "activo",
+   "acc": "Zona con caminos dañados; mejor no ir si no hace falta.",
+   "when": "Lun 19, noche",
+   "url": "https://www.periodicodeibiza.es/cronica-negra/local/2026/10/20/2732407/santa-eularia-lleva-peor-parte-segunda-jornada-lluvias-adam.html",
+   "lat": 38.996,
+   "lon": 1.585,
    "approx": true
   }
  ],
