@@ -1,8 +1,6 @@
 name: Actualizar datos
 
 on:
-  schedule:
-    - cron: "*/20 * * * *"
   workflow_dispatch:
   push:
     branches: [main]
