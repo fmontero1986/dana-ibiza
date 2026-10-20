@@ -1,18 +1,18 @@
 {
- "updatedAt": "2026-10-20T06:07:50Z",
- "checkedAt": "2026-10-20T06:07:50Z",
+ "updatedAt": "2026-10-20T08:16:30Z",
+ "checkedAt": "2026-10-20T08:16:30Z",
  "estado": {
   "emergencias": {
    "nivel": "naranja",
    "titulo": "alerta naranja",
-   "texto": "Baja de roja a naranja (Plan Meteobal IG-1) en Ibiza y Formentera tras la reunión del lunes por la tarde. El plan de inundaciones sigue en situación 2. Clases y actividades al aire libre se reanudan el martes."
+   "texto": "Sigue la alerta naranja (IG-1 del Plan Meteobal) en Ibiza y Formentera, sin hora de fin fijada. El plan de inundaciones sigue en su nivel más alto (situación 2)."
   },
   "aemet": {
    "nivel": "amarillo",
-   "titulo": "aviso amarillo",
-   "texto": "Lluvias y tormentas el martes desde las 00:00 hasta las 12:00 en Ibiza y Formentera. Puede dejar unos 30 l/m² en una hora en algún punto, con muchos rayos."
+   "titulo": "aviso amarillo hasta las 12:00",
+   "texto": "El aviso amarillo por lluvias y tormentas acaba a las 11:59 de hoy martes. Después AEMET no prevé fenómenos peligrosos en las Pitiusas, y el miércoles da 0 % de lluvia."
   },
-  "notaAhora": "Esta página dejó de actualizarse el martes 20/10 a las 08:00. Último estado conocido: alerta naranja de Emergencias y aviso amarillo de AEMET hasta las 12:00. Para información actual, consulta los avisos oficiales de Emergències 112 y AEMET.",
+  "notaAhora": "Actualizado a mano el martes 20/10 a las 10:20 (la página ya no se actualiza sola). Aviso amarillo de AEMET hasta las 12:00 y alerta naranja de Emergencias aún activa. Por la tarde baja mucho la probabilidad de lluvia (10–40 %) y el miércoles es 0 %. El aeropuerto registró 173,8 l/m² en 24 h, récord desde 1944. Siguen zonas con agua estancada, como el aparcamiento de es Pratet.",
   "notaAuto": ""
  },
  "estaciones": [
@@ -40,27 +40,27 @@
  "prob": [
   {
    "id": "eivissa",
-   "p": "100%",
-   "note": "mar 00–12 h; 40% por la tarde",
+   "p": "40%",
+   "note": "mar 12–24 h (por la mañana fue 100 %); miércoles 0–5 %",
    "url": "https://www.aemet.es/es/eltiempo/prediccion/municipios/eivissa-id07026"
   },
   {
-   "id": "santjosep",
-   "p": "95%",
-   "note": "mar 00–06 h; 80% de 06 a 12 h",
-   "url": "https://www.aemet.es/en/eltiempo/prediccion/municipios/sant-josep-de-sa-talaia-id07048"
-  },
-  {
    "id": "santaeularia",
-   "p": "85%",
-   "note": "dato para todo el martes",
-   "url": "https://www.aemet.es/en/eltiempo/prediccion/municipios/santa-eularia-des-riu-id07054"
+   "p": "10%",
+   "note": "mar 12–24 h (95 % por la mañana); miércoles 0 %",
+   "url": "https://www.aemet.es/es/eltiempo/prediccion/municipios/santa-eularia-des-riu-id07054"
   },
   {
    "id": "formentera",
-   "p": "90%",
-   "note": "mar 00–12 h",
+   "p": "25%",
+   "note": "mar 12–24 h (85–95 % por la mañana); miércoles 0 %",
    "url": "https://www.aemet.es/es/eltiempo/prediccion/municipios/formentera-san-francisco-javier-id07024"
+  },
+  {
+   "id": "santjosep",
+   "p": "s/d",
+   "note": "la página de AEMET no mostraba el martes",
+   "url": "https://www.aemet.es/es/eltiempo/prediccion/municipios/sant-josep-de-sa-talaia-id07048"
   },
   {
    "id": "santjoan",
@@ -72,10 +72,37 @@
    "id": "santantoni",
    "p": "s/d",
    "note": "la página de AEMET no mostraba el martes",
-   "url": "https://www.aemet.es/en/eltiempo/prediccion/municipios/horas/tabla/sant-antoni-de-portmany-id07046"
+   "url": "https://www.aemet.es/es/eltiempo/prediccion/municipios/horas/tabla/sant-antoni-de-portmany-id07046"
   }
  ],
  "avisos": [
+  {
+   "ts": "2026-10-20T10:03",
+   "emisor": "Ayuntamiento de Eivissa",
+   "tipo": "ayuntamiento",
+   "nivel": "amarillo",
+   "texto": "Operarios municipales y la UME siguen achicando en es Pratet. Según el concejal de Comercio, podrían cerrarse las calles Diputado José Ribas y Pere Francés si vuelve a llover.",
+   "url": "https://www.periodicodeibiza.es/cronica-negra/local/2026/10/20/2732387/adam-genera-caos-ibiza-aqui-venido-dios-desde-ayer.html",
+   "via": "Periódico de Ibiza"
+  },
+  {
+   "ts": "2026-10-20T09:00",
+   "emisor": "AEMET",
+   "tipo": "aemet",
+   "nivel": "amarillo",
+   "texto": "El aviso amarillo por lluvias y tormentas termina a las 11:59 del martes. Después no hay más avisos previstos en Ibiza y Formentera.",
+   "url": "https://lavozdeibiza.com/actualidad/hasta-cuando-siguen-los-avisos-por-la-dana-adam-en-ibiza-y-formentera/",
+   "via": "La Voz de Ibiza"
+  },
+  {
+   "ts": "2026-10-20T09:00",
+   "emisor": "Emergències 112 (Protección Civil)",
+   "tipo": "proteccion",
+   "nivel": "naranja",
+   "texto": "Se mantiene la alerta naranja (IG-1) sin hora de fin y el plan de inundaciones en situación 2. Las clases se han reanudado con normalidad.",
+   "url": "https://lavozdeibiza.com/actualidad/hasta-cuando-siguen-los-avisos-por-la-dana-adam-en-ibiza-y-formentera/",
+   "via": "La Voz de Ibiza"
+  },
   {
    "ts": "2026-10-20T03:58",
    "emisor": "Emergències 112 (Protección Civil)",
@@ -248,7 +275,15 @@
    "via": "Periódico de Ibiza"
   }
  ],
- "incidencias": {},
+ "incidencias": {
+  "i-pratet": {
+   "st": "activo",
+   "acc": "Aparcamiento parcialmente cerrado: sigue con agua y sin fecha de reapertura. Evita la zona en coche.",
+   "when": "Mar 20, 10:00",
+   "d": "Una parte del aparcamiento de es Pratet sigue inundada y no se puede usar con normalidad. Varios comercios de Felip II, Pere Francés y los pasajes siguen cerrados o limpiando.",
+   "url": "https://www.periodicodeibiza.es/pitiusas/ibiza/2026/10/20/2732479/aparcamiento-pratet-parcialmente-cerrado-por-inundaciones-ibiza.html"
+  }
+ },
  "incidenciasNuevas": [
   {
    "id": "n-20261019-pm820",
